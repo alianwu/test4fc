@@ -18,7 +18,7 @@ return array(
   ':field must be an ip address' => ':field 必须是有效的IP格式',
   ':field must be the same as :param3' => ':field 必须和 :param3 相同',
   ':field must be at least :param2 characters long' => ':field 字符最短长度为 :param2',
-  ':field must not exceed :param2 characters long' => ':field 不要超过长度 :param2 限制',
+  ':field must not exceed :param2 characters long' => ':field 不要超过长度为 :param2 的限制',
   ':field must not be empty' => ':field 不能为空',
   ':field must be numeric' => ':field 必须是有效的数字',
   ':field must be a phone number' => ':field 必须是电话号码',

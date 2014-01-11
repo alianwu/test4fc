@@ -60,6 +60,8 @@ mb_substitute_character('none');
 /**
  * Set the default language
  */
+UTF8::$server_utf8 = TRUE;
+
 I18n::lang('zh-cn');
 
 if (isset($_SERVER['SERVER_PROTOCOL']))
@@ -119,6 +121,7 @@ Kohana::$config->attach(new Config_File);
 Kohana::modules(array(
 	// 'auth'       => MODPATH.'auth',       // Basic authentication
 	// 'cache'      => MODPATH.'cache',      // Caching with multiple backends
+	   'redis'      => MODPATH.'redis',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
 	// 'database'   => MODPATH.'database',   // Database access
 	// 'image'      => MODPATH.'image',      // Image manipulation
