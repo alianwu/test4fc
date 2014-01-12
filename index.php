@@ -64,7 +64,11 @@ require APPPATH.'bootstrap'.EXT;
  * Execute the main request. A source of the URI can be passed, eg: $_SERVER['PATH_INFO'].
  * If no source is specified, the URI will be automatically detected.
  */
-echo Request::factory(TRUE, array(), FALSE)
-        ->execute()
-        ->send_headers(TRUE)
-        ->body();
+ 
+$cache = HTTP_Cache::factory(Cache::instance('redis'));
+$cache->cache_key_callback('Cache_Redis::get_request_key');
+
+$quest = Request::factory(TRUE, array(), FALSE);
+$quest->client()->cache($cache);
+echo $quest->execute()->send_headers(TRUE)->body();
+

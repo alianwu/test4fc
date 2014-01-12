@@ -4,6 +4,7 @@ class Controller_Home extends CTemplate {
 
   public function action_index()
   {
+    $this->response->headers('cache-control', 'max-age=3600');
     $this->template->content = View::factory('index');
   }
   

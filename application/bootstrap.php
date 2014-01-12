@@ -100,7 +100,7 @@ Cookie::$salt = 'this is a cookie salt in here';
  */
 Kohana::init(array(
 	'base_url'   => '/',
-	'index_file' => NULL,
+	'index_file' => '',
 	'caching'    => FALSE,
 	'errors'     => TRUE,
 ));
@@ -120,18 +120,18 @@ Kohana::$config->attach(new Config_File);
  */
 Kohana::modules(array(
 	// 'auth'       => MODPATH.'auth',       // Basic authentication
-	// 'cache'      => MODPATH.'cache',      // Caching with multiple backends
+	   'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	   'redis'      => MODPATH.'redis',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
-	// 'database'   => MODPATH.'database',   // Database access
-	// 'image'      => MODPATH.'image',      // Image manipulation
+	   'database'   => MODPATH.'database',   // Database access
+	   'image'      => MODPATH.'image',      // Image manipulation
 	// 'minion'     => MODPATH.'minion',     // CLI Tasks
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
-	// 'unittest'   => MODPATH.'unittest',   // Unit testing
+	   'unittest'   => MODPATH.'unittest',   // Unit testing
 	// 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
 	// 'mangodb'    => MODPATH.'mangodb',    // 
-	// 'captcha'    => MODPATH.'captcha',    // 
-	// 'pagination' => MODPATH.'pagination',    // 
+	   'captcha'    => MODPATH.'captcha',    // 
+	   'pagination' => MODPATH.'pagination',    // 
 	));
 
 /**
