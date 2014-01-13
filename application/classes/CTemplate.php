@@ -19,14 +19,16 @@ abstract class CTemplate extends Controller {
    * @var  boolean  auto render template
    **/
   public $auto_render = TRUE;
-
+  
   /**
    * Loads the template [View] object.
    */
   public function before()
   {
     parent::before();
-
+    
+    $this->auto_render = ! (bool) Arr::get($_SERVER, 'HTTP_X_PJAX', FALSE);
+    
     if ($this->auto_render === TRUE)
     {
       // Load the template
