@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Cache extends Controller {
+class Controller_Test_Cache extends Controller {
 
   public function action_redis()
   {

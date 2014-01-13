@@ -7,6 +7,7 @@
  * @link http://kohanaframework.org/guide/about.install#ext
  */
 define('EXT', '.php');
+define('STATIC_SITE_URL', 'http://data.perhome.cn/');
 
 /**
  * Set the PHP error reporting level. If you set this in php.ini, you remove this.
@@ -66,9 +67,16 @@ require APPPATH.'bootstrap'.EXT;
  */
  
 $cache = HTTP_Cache::factory(Cache::instance('redis'));
-$cache->cache_key_callback('Cache_Redis::get_request_key');
+$cache->cache_key_callback(function (Request $request) {
+    $uri     = $request->uri();
+    $query   = $request->query();
+    return sha1($uri.'?'.http_build_query($query, NULL, '&'));
+  });
 
 $quest = Request::factory(TRUE, array(), FALSE);
 $quest->client()->cache($cache);
-echo $quest->execute()->send_headers(TRUE)->body();
+
+echo $quest->execute()
+      ->send_headers(TRUE)
+      ->body();
 

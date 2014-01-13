@@ -61,7 +61,6 @@ mb_substitute_character('none');
  * Set the default language
  */
 UTF8::$server_utf8 = TRUE;
-
 I18n::lang('zh-cn');
 
 if (isset($_SERVER['SERVER_PROTOCOL']))
@@ -80,8 +79,6 @@ if (isset($_SERVER['KOHANA_ENV']))
 {
 	Kohana::$environment = constant('Kohana::'.strtoupper($_SERVER['KOHANA_ENV']));
 }
-
-Cookie::$salt = 'this is a cookie salt in here';
 
 /**
  * Initialize Kohana, setting the default options.
@@ -133,6 +130,10 @@ Kohana::modules(array(
 	   'captcha'    => MODPATH.'captcha',    // 
 	   'pagination' => MODPATH.'pagination',    // 
 	));
+
+Cache::$default  = 'redis';
+Session::$default = 'redis';
+Cookie::$salt = 'this is a cookie salt in here';
 
 /**
  * Set the routes. Each route must have a minimum of a name, a URI and a set of

@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Language extends Controller {
+class Controller_Test_Language extends Controller {
 
   public function action_index()
   {

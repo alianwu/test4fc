@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Form extends Controller {
+class Controller_Test_Form extends Controller {
 
   public function action_post()
   {

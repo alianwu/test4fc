@@ -1,17 +1,18 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Redis extends Controller {
+class Controller_Test_Redis extends CTemplate {
 
   public function action_index()
   {
     $redis = new Redis();
     $connected = $redis->connect('/tmp/redis.sock');
     if ($connected) {
-      echo 'connected';
+      $message =  'connected';
     }
     else {
-      echo 'unconnected';
+      $message = 'unconnected';
     }
+    $this->template->content = $message;
   }
   
 } // End Redis
