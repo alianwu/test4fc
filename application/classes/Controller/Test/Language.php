@@ -14,8 +14,9 @@ class Controller_Test_Language extends CTemplate {
       $this->template->content = View::factory('test/index');
       $this->template->detail = $output;
     }
-    
-    exit($output);
+    else {
+      $this->response->body($output);
+    }
   }
 
 }
