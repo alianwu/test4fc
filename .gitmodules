@@ -1,39 +1,36 @@
 [submodule "system"]
 	path = system
-	url = git@github.com:perhome/core.git
+	url = github4ph:perhome/kohana-core.git
 [submodule "modules/codebench"]
 	path = modules/codebench
-	url = git@github.com:perhome/codebench.git
+	url = github4ph:perhome/kohana-codebench.git
 [submodule "modules/database"]
 	path = modules/database
-	url = git@github.com:perhome/database.git
+	url = github4ph:perhome/kohana-database.git
 [submodule "modules/image"]
 	path = modules/image
-	url = git@github.com:perhome/image.git
+	url = github4ph:perhome/kohana-image.git
 [submodule "modules/orm"]
 	path = modules/orm
-	url = git@github.com:perhome/orm.git
+	url = github4ph:perhome/kohana-orm.git
 [submodule "modules/auth"]
 	path = modules/auth
-	url = git@github.com:perhome/auth.git
+	url = github4ph:perhome/kohana-auth.git
 [submodule "modules/userguide"]
 	path = modules/userguide
-	url = git@github.com:perhome/userguide.git
+	url = github4ph:perhome/kohana-userguide.git
 [submodule "modules/cache"]
 	path = modules/cache
-	url = git@github.com:perhome/cache.git
+	url = github4ph:perhome/kohana-cache.git
 [submodule "modules/unittest"]
 	path = modules/unittest
-	url = git@github.com:perhome/unittest.git
+	url = github4ph:perhome/kohana-unittest.git
 [submodule "modules/minion"]
 	path = modules/minion
-	url = git@github.com:perhome/minion.git
+	url = github4ph:perhome/kohana-minion.git
 [submodule "modules/pagination"]
 	path = modules/pagination
-	url = git@github.com:perhome/pagination.git
-[submodule "modules/captcha"]
-	path = modules/captcha
-	url = git@github.com:perhome/captcha.git
+	url = github4ph:perhome/kohana-pagination.git
 [submodule "modules/mangodb"]
 	path = modules/mangodb
-	url = git@github.com:perhome/mangodb.git
+	url = github4ph:perhome/kohana-mangodb.git
