@@ -34,3 +34,9 @@
 [submodule "modules/mangodb"]
 	path = modules/mangodb
 	url = github4ph:perhome/kohana-mangodb.git
+[submodule "modules/redis"]
+	path = modules/redis
+	url = github4ph:perhome/kohana-redis.git
+[submodule "modules/captcha"]
+	path = modules/captcha
+	url = github4ph:perhome/kohana-captcha.git
