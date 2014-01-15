@@ -26,8 +26,11 @@ return array(
   ':field does not match the required format' => ':field 不符合规定要求',
   ':field must be a url' => ':field 必须是网址格式',
   
-  'username' => '账户',
+  'email'    => '邮件',
+  'agree'    => '网站协议',
+  'username' => '用户名称',
   'password' => '密码',
+  'repassword' => '确认密码',
   'captcha'  => '验证码',
 
 );

@@ -40,3 +40,6 @@
 [submodule "modules/captcha"]
 	path = modules/captcha
 	url = github4ph:perhome/kohana-captcha.git
+[submodule "modules/accounts"]
+	path = modules/accounts
+	url = github4ph:perhome/accounts.puhua.co.git
