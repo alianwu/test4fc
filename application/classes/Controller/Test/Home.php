@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Home extends Controller_Template {
+class Controller_Test_Home extends Controller_Test_Template {
 
   public function before()
   {

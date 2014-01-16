@@ -8,7 +8,7 @@
  * @copyright  (c) 2008-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-abstract class Controller_Template extends Controller {
+abstract class Controller_Test_Template extends Controller {
 
   /**
    * @var  View  page template
