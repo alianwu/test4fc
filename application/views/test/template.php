@@ -11,15 +11,13 @@
 </head>
 <body>
 <div class="pure-g">
-  <div class="pure-u">
-    <div class="pure-u-1-2">
-      <?php if (isset($content)): echo $content; endif; ?> 
-    </div><div class="pure-u-1-2" id="detail">
-      <?php if (isset($detail)): echo $detail; endif; ?> 
-    </div><div class="pure-u-1">
-      <?php echo View::factory('profiler/stats'); ?>
-    </div>    
-  </div>
+  <div class="pure-u-1-2">
+    <?php if (isset($content)): echo $content; endif; ?> 
+  </div><div class="pure-u-1-2" id="detail">
+    <?php if (isset($detail)): echo $detail; endif; ?> 
+  </div><div class="pure-u-1">
+    <?php echo View::factory('profiler/stats'); ?>
+  </div>    
 </div>
 <script>
   $(function(){
