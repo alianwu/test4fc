@@ -34,7 +34,7 @@ error_reporting(E_ALL | E_STRICT);
 // Set the full path to the docroot
 define('DOCROOT', realpath(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 
-define('KOHANA', realpath(DOCROOT.DIRECTORY_SEPARATOR.'..'. DIRECTORY_SEPARATOR .'kohana').DIRECTORY_SEPARATOR);
+define('KOHANA', '/home/server/core/applications/kohana/');
 
 // Define the absolute paths for configured directories
 define('APPPATH', DOCROOT.'application'.DIRECTORY_SEPARATOR);
