@@ -1,48 +1,48 @@
 [submodule "system"]
 	path = system
-	url = github4ph:perhome/kohana-core.git
+	url = git@github.com:perhome/kohana-core.git
 [submodule "modules/codebench"]
 	path = modules/codebench
-	url = github4ph:perhome/kohana-codebench.git
+	url = git@github.com:perhome/kohana-codebench.git
 [submodule "modules/database"]
 	path = modules/database
-	url = github4ph:perhome/kohana-database.git
+	url = git@github.com:perhome/kohana-database.git
 [submodule "modules/image"]
 	path = modules/image
-	url = github4ph:perhome/kohana-image.git
+	url = git@github.com:perhome/kohana-image.git
 [submodule "modules/orm"]
 	path = modules/orm
-	url = github4ph:perhome/kohana-orm.git
+	url = git@github.com:perhome/kohana-orm.git
 [submodule "modules/auth"]
 	path = modules/auth
-	url = github4ph:perhome/kohana-auth.git
+	url = git@github.com:perhome/kohana-auth.git
 [submodule "modules/userguide"]
 	path = modules/userguide
-	url = github4ph:perhome/kohana-userguide.git
+	url = git@github.com:perhome/kohana-userguide.git
 [submodule "modules/cache"]
 	path = modules/cache
-	url = github4ph:perhome/kohana-cache.git
+	url = git@github.com:perhome/kohana-cache.git
 [submodule "modules/unittest"]
 	path = modules/unittest
-	url = github4ph:perhome/kohana-unittest.git
+	url = git@github.com:perhome/kohana-unittest.git
 [submodule "modules/minion"]
 	path = modules/minion
-	url = github4ph:perhome/kohana-minion.git
+	url = git@github.com:perhome/kohana-minion.git
 [submodule "modules/pagination"]
 	path = modules/pagination
-	url = github4ph:perhome/kohana-pagination.git
+	url = git@github.com:perhome/kohana-pagination.git
 [submodule "modules/mangodb"]
 	path = modules/mangodb
-	url = github4ph:perhome/kohana-mangodb.git
+	url = git@github.com:perhome/kohana-mangodb.git
 [submodule "modules/redis"]
 	path = modules/redis
-	url = github4ph:perhome/kohana-redis.git
+	url = git@github.com:perhome/kohana-redis.git
 [submodule "modules/captcha"]
 	path = modules/captcha
-	url = github4ph:perhome/kohana-captcha.git
+	url = git@github.com:perhome/kohana-captcha.git
 [submodule "modules/accounts"]
 	path = modules/accounts
-	url = github4ph:perhome/accounts.puhua.co.git
+	url = git@github.com:perhome/accounts.puhua.co.git
 [submodule "modules/article"]
 	path = modules/article
-	url = github4ph:perhome/kohana-article.git
+	url = git@github.com:perhome/kohana-article.git
