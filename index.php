@@ -7,7 +7,6 @@
  * @link http://kohanaframework.org/guide/about.install#ext
  */
 define('EXT', '.php');
-define('STATIC_SITE_URL', 'http://data.perhome.cn/');
 
 /**
  * Set the PHP error reporting level. If you set this in php.ini, you remove this.
@@ -34,12 +33,10 @@ error_reporting(E_ALL | E_STRICT);
 // Set the full path to the docroot
 define('DOCROOT', realpath(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 
-define('KOHANA', '/home/server/core/applications/kohana/');
-
 // Define the absolute paths for configured directories
 define('APPPATH', DOCROOT.'application'.DIRECTORY_SEPARATOR);
-define('MODPATH', KOHANA.'modules'.DIRECTORY_SEPARATOR);
-define('SYSPATH', KOHANA.'system'.DIRECTORY_SEPARATOR);
+define('MODPATH', DOCROOT.'modules'.DIRECTORY_SEPARATOR);
+define('SYSPATH', DOCROOT.'system'.DIRECTORY_SEPARATOR);
 
 
 /**
@@ -66,7 +63,7 @@ require APPPATH.'bootstrap'.EXT;
  * If no source is specified, the URI will be automatically detected.
  */
  
-$cache = HTTP_Cache::factory(Cache::instance('redis'));
+$cache = HTTP_Cache::factory(Cache::instance());
 $cache->cache_key_callback(function (Request $request) {
     $uri     = $request->uri();
     $query   = $request->query();

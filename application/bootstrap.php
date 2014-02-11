@@ -96,8 +96,8 @@ if (isset($_SERVER['KOHANA_ENV']))
  * - boolean  expose      set the X-Powered-By header                        FALSE
  */
 Kohana::init(array(
-	'base_url'   => '/',
-	'index_file' => '',
+	'base_url'   => '/works/test4fc/',
+	'index_file' => 'index.php',
 	'caching'    => FALSE,
 	'errors'     => TRUE,
 ));
@@ -116,9 +116,9 @@ Kohana::$config->attach(new Config_File);
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
 Kohana::modules(array(
-	   'auth'       => MODPATH.'auth',       // Basic authentication
+	// 'auth'       => MODPATH.'auth',       // Basic authentication
 	   'cache'      => MODPATH.'cache',      // Caching with multiple backends
-	   'redis'      => MODPATH.'redis',      // Caching with multiple backends
+	// 'redis'      => MODPATH.'redis',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
 	   'database'   => MODPATH.'database',   // Database access
 	   'image'      => MODPATH.'image',      // Image manipulation
@@ -129,11 +129,11 @@ Kohana::modules(array(
 	// 'mangodb'    => MODPATH.'mangodb',    // 
 	   'captcha'    => MODPATH.'captcha',    // 
 	   'pagination' => MODPATH.'pagination', // 
-	   'accounts' => MODPATH.'accounts', // 
+	   'accounts'   => MODPATH.'accounts',     // 
 	));
 
-Cache::$default  = 'redis';
-Session::$default = 'redis';
+Cache::$default  = 'file';
+Session::$default = 'native';
 Cookie::$salt = 'this is a cookie salt in here';
 
 
@@ -142,8 +142,6 @@ Cookie::$salt = 'this is a cookie salt in here';
  * defaults for the URI.
  */
  
-
-
 Route::set('default', '(<controller>(/<action>(/<id>))(<suffix>))', array('id'=>'\d+', 'suffix'=>'\.html?'))
 	->defaults(array(
 		'controller' => 'home',

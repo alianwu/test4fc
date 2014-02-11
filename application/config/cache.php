@@ -6,5 +6,15 @@ return array
     'group'              => 'default',
     'db'                 =>  8,
     'default_expire'     => 3600,
+  ),
+	'file'    => array(
+		'driver'             => 'file',
+		'cache_dir'          => APPPATH.'cache',
+		'default_expire'     => 3600,
+		'ignore_on_delete'   => array(
+			'.gitignore',
+			'.git',
+			'.svn'
+      ),
   )
 );

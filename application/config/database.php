@@ -13,7 +13,7 @@ return array
 			 * string   password    database password
 			 * boolean  persistent  use persistent connections?
 			 */
-			'dsn'        => 'pgsql:host=/tmp/;dbname=perhome_demo',
+			'dsn'        => 'pgsql:host=/tmp/;dbname=test4fc',
 			'username'   => 'data',
 			'password'   => 'demo@perhome',
 			'persistent' => FALSE,
