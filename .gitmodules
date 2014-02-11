@@ -43,3 +43,6 @@
 [submodule "modules/accounts"]
 	path = modules/accounts
 	url = github4ph:perhome/accounts.puhua.co.git
+[submodule "modules/article"]
+	path = modules/article
+	url = github4ph:perhome/kohana-article.git
