@@ -6,7 +6,7 @@
 require SYSPATH.'classes/Kohana/Core'.EXT;
 
 // Load empty core extension
-require SYSPATH.'classes/Kohana'.EXT;
+require APPPATH.'classes/Kohana'.EXT;
 
 /**
  * Set the default time zone.
@@ -99,7 +99,10 @@ Kohana::init(array(
 	'base_url'   => '/works/test4fc/',
 	'index_file' => 'index.php',
 	'caching'    => FALSE,
+	'cache_life' => 60,
+	'cache_dir'  => APPPATH.'cache',
 	'errors'     => TRUE,
+	'profile'    => TRUE,
 ));
 
 /**
@@ -116,7 +119,7 @@ Kohana::$config->attach(new Config_File);
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
 Kohana::modules(array(
-	// 'auth'       => MODPATH.'auth',       // Basic authentication
+	   'auth'       => MODPATH.'auth',       // Basic authentication
 	   'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	// 'redis'      => MODPATH.'redis',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
@@ -141,6 +144,13 @@ Cookie::$salt = 'this is a cookie salt in here';
  * Set the routes. Each route must have a minimum of a name, a URI and a set of
  * defaults for the URI.
  */
+Route::set('manager', '<controller>(/<action>(/<id>))', 
+                array('controller'=> '(sigin|sigup|resetpasswd)', 'id'=>'\d+', 'suffix'=>'\.html?'))
+	->defaults(array(
+		'directory' => 'manager',
+		'controller' => 'home',
+		'action'     => 'index',
+	));
  
 Route::set('default', '(<controller>(/<action>(/<id>))(<suffix>))', array('id'=>'\d+', 'suffix'=>'\.html?'))
 	->defaults(array(

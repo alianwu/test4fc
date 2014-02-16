@@ -2,6 +2,6 @@
 
 class Model_User extends Model_Accounts_Core {
 
-  public static $table = 'user';
-
+  public $table = 'user';
+  
 }

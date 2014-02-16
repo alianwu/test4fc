@@ -5,11 +5,15 @@ class Controller_Home extends Controller_Template {
   public function before()
   {
     parent::before();
-    $this->response->headers('cache-control', 'max-age=5');
+    $this->model_house = Model::factory('House_New');
+    // $this->response->headers('cache-control', 'max-age=5');
   }
   public function action_index()
   {
-    $this->template->content = View::factory('index');
+    $house = $this->model_house->get_house_front($this->city_id, 1);
+    $view =  View::factory('index');
+    $view->bind_global('house', $house);
+    $this->template->content = $view;
   }
 
 } // End Home

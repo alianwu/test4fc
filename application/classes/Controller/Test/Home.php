@@ -9,6 +9,7 @@ class Controller_Test_Home extends Controller_Test_Template {
   }
   public function action_index()
   {
+    $auth = 
     $this->template->content = View::factory('test/index');
   }
 
