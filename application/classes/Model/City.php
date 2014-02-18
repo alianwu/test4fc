@@ -58,8 +58,8 @@ class Model_City extends Model {
     if (isset($data['cid']) && $data['cid'] == 0) {
       $name = explode("\n", $data['name']);
       $value = explode("\n", $data['value']);
-      $query = DB::query(Database::INSERT, 'INSERT INTO city (name, value parent_cid, type, display, weight) 
-                  VALUES (:name, :value, :parent_cid, :type, :display, :weight)')
+      $query = DB::query(Database::SELECT, 'INSERT INTO city (name, value, parent_cid, type, display, weight) 
+                  VALUES (:name, :value, :parent_cid, :type, :display, :weight) RETURNING cid')
                 ->param(':parent_cid', $data['parent_cid'])
                 ->param(':type', $data['type'])
                 ->param(':display', (bool) $data['display'])
@@ -71,7 +71,7 @@ class Model_City extends Model {
           if (isset($value[$k])) {
             $v = trim($value[$k]);
           }
-          $query->param(':name', $n)->param(':value', $v)->execute() ? $index++ : NULL;
+          ($test = $query->param(':name', $n)->param(':value', $v)->as_object()->execute() ) ? $index++ : NULL;
         }
       }
       $ret['info'] = '执行成功：'. $index;

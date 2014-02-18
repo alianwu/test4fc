@@ -44,3 +44,12 @@ dd {
 .button-secondary {
     background: rgb(66, 184, 221); /* this is a light blue */
 }
+
+
+.attachment-img {
+
+  margin: 5px 5px 5px 0;
+  height: 120px;
+
+  border: 1px #999 solid;
+}

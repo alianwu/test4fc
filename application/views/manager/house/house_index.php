@@ -11,7 +11,6 @@
       <th>地铁站</th>
       <th>小区地址</th>
       <th>增加人</th>
-      <th>问答</th>
       <th>操作</th>
     </tr>
   </thead>
@@ -26,8 +25,10 @@
       <td><?php echo $city_cache[$v->underground_platform]; ?></td>
       <td><?php echo $v->address; ?></td>
       <td><?php echo $v->author; ?></td>
-      <td></td>
       <td>
+        
+        <?php echo HTML::anchor('manager_house_home/attachment'. URL::query(array('hid'=>$v->hid)), '附件管理'); ?>
+        <?php echo HTML::anchor('manager_house_home/faq'. URL::query(array('hid'=>$v->hid)), '问答管理'); ?>
         <?php echo HTML::anchor('manager_house_home/display'. URL::query(array('hid'=>$v->hid)), $v->display?'显示':'隐藏'); ?>
         <?php echo HTML::anchor('manager_house_home/editor'. URL::query(array('hid'=>$v->hid)), '编辑'); ?>
         <?php echo HTML::anchor('manager_house_home/delete'. URL::query(array('hid'=>$v->hid)), '删除', array('onClick'=>'return confirm("确定删除么");')); ?>

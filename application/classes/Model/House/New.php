@@ -30,7 +30,7 @@ class Model_House_New extends Model {
   
   public function get_house_front($city_id, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] as phone_1 FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat FROM house 
                 WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination['items_per_page'])
@@ -44,20 +44,67 @@ class Model_House_New extends Model {
   public function get_house_search()
   {
     $ret = array('total' => 0, 'data' => NULL);
+
     return $ret;
+  }
+
+  public function get_near_front($cid, $lat, $lng, $radius)
+  {
+    $ret = array('total' => 0, 'data' => NULL);
+    $point = 'POINT('.$lng.' '.$lat.')';
+    $sql = "SELECT t.*, t.geo[0] AS lng, t.geo[1] As lat FROM house As t
+                WHERE city_id=:city_id AND ST_DWithin(
+                  ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
+                  ST_Transform(t.geo2, 26986), "
+                  .$radius.") 
+                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo2) LIMIT :num";
+    $query = DB::query(Database::SELECT, $sql)
+              ->param(':city_id', $cid)
+              ->param(':num', 30)
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
   }
 
   public function get_house_one($hid)
   {
-    $query = DB::query(Database::SELECT, 'SELECT * FROM house WHERE hid=:hid')
+    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
     return $query->count() == 0? FALSE : Arr::get($query->as_array(), 0);
   }
-  
+
+  public function get_house_one_front($hid)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid AND display = TRUE LIMIT 1')
+              ->param(':hid', $hid)
+              ->as_object()
+              ->execute();
+    return $query->count() == 0? FALSE : $query->current();
+  }
+
+  public function attachment_save($hid, $type, $attachment)
+  {
+    $field = 'attachment_'.$type;
+    $query = DB::query(Database::UPDATE, 'UPDATE house SET '.$field.'=array_append('.$field.',:attachment) WHERE hid=:hid')
+              ->param(':hid', $hid)
+              ->param(':attachment', urldecode($attachment))
+              ->execute();
+    return $query == 0? FALSE : TRUE;
+  }
+
+  public function attachment_delete($hid, $type, $attachment)
+  {
+    $field = 'attachment_'.$type;
+    $query = DB::query(Database::UPDATE, 'UPDATE house SET '.$field.'=array_remove('.$field.',:attachment) WHERE hid=:hid')
+              ->param(':hid', $hid)
+              ->param(':attachment', urldecode($attachment))
+              ->execute();
+    return $query == 0? FALSE : TRUE;
+  }
+
   public function save($data)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
+    $ret = array('error'=>TRUE, 'info'=>'', 'data' => '');
 
     $data['geo'] = $data['lng'] . ',' . $data['lat']; 
     $data['display'] = (bool) $data['display']; 
@@ -75,16 +122,21 @@ class Model_House_New extends Model {
         unset($data[$k]);
       }
     }
+    $geo_update_sql = 'update house set geo2 = ST_GeomFromText(concat(\'POINT(\',geo[0], \' \', geo[1], \')\'), 4326) 
+                              WHERE hid=:hid';
     if ($data['hid'] == 0) {
       unset($data['hid']);
       $field =  implode(',', array_keys($data));
       $value =  implode(', :', array_keys($data));
-      $query = DB::query(Database::INSERT, 'INSERT INTO house ('. $field .', created) VALUES (:'. $value .', NOW())')
+      $query = DB::query(Database::SELECT, 'INSERT INTO house ('. $field .', created) VALUES (:'. $value .', NOW()) RETURNING hid')
                 ->parameters($parameters)
+                ->as_object()
                 ->execute();
       if ($query) {
         $ret['info'] = '执行成功';
         $ret['error'] = FALSE;
+        $ret['data'] = $hid =  $query->get('hid');
+        DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
       }
     }
     else {
@@ -96,7 +148,9 @@ class Model_House_New extends Model {
                 ->execute();
       if($query) {
         $ret['error'] = FALSE;
-      }
+        $ret['data'] = $data['hid'];
+        DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $data['hid'])->execute();
+     }
 
     }
     return $ret;

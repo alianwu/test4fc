@@ -8,12 +8,12 @@
         <div class="pure-control-group info info-error"><?php  echo $Account_Check_Message; ?></div>
         <?php endif;?>
         <div class="pure-control-group">
-            <label for="name">邮件</label>
+            <label for="email">邮件</label>
             <?php echo $user['email']; ?>
         </div>
         <div class="pure-control-group">
-            <label for="name">名称</label>
-            <?php echo Form::input('name', Arr::get($_POST, 'name', $user['name']), array('id'=>'name', 'placeholder'=>'请输入你的账户名称')); ?>
+            <label for="username">名称</label>
+            <?php echo Form::input('username', Arr::get($_POST, 'username', $user['name']), array('id'=>'username', 'placeholder'=>'请输入你的账户名称')); ?>
         </div>
         <div class="pure-control-group">
             <label for="password">旧密码</label>

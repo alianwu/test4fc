@@ -48,6 +48,7 @@ abstract class Controller_Template extends Controller {
     $this->model_city = Model::factory('City');
     $this->city_pretty = $this->model_city->get_city_pretty();
 
+    $this->user = $this->get_user();
     $this->city_id = $this->get_city_id();
     $this->city_area = $this->model_city->get_city_pretty($this->city_id);
     $this->city_cache = $this->model_city->get_city_cache();
@@ -69,31 +70,15 @@ abstract class Controller_Template extends Controller {
     }
   }
 
-  public function action_set_cityid()
+  public function get_user()
   {
-    $this->city_id = $this->request->param('id');
-    Cookie::set('city_id', $this->city_id);
-    $this->action_index();
-  }
-
-  public function action_set_citystr()
-  {
-    $str  = Arr::get($_GET, 'str', '');
-    if ($str && in_array($str, $this->city_pretty)) {
-      $city_pretty = array_flip($this->city_pretty);
-      $this->city_id = $city_pretty[mb_substr($str, 0, -1)];
-      Cookie::set('city_id', $this->city_id);
-    }
-    else {
-      $this->alert = '你所在的城市暂时没有记录';
-    }
-    $this->action_index();
+    return array('_id'=> 1, '_name'=>'测试'); 
   }
 
   public function get_city_id()
   {
     $city_id = (int) Cookie::get('city_id');
-    if(isset($this->city_pretty[(int)$city_id])) {
+    if(isset($this->city_pretty[$city_id])) {
       return $city_id;
     }
     return 1;

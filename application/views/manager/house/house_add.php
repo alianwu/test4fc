@@ -138,8 +138,8 @@
         
         <div class="pure-control-content">
           <div id="map" style="height: 200px; width: 500px; display: block;"></div>
-          <?php echo Form::hidden('lat', Arr::get($_POST, 'lat', $city_lat), array('id'=>'lat')); ?>
-          <?php echo Form::hidden('lng', Arr::get($_POST, 'lng', $city_lng), array('id'=>'lng')); ?>
+          <?php echo Form::hidden('lat', $lat = Arr::get($_POST, 'lat', $city_lat), array('id'=>'lat')); ?>
+          <?php echo Form::hidden('lng', $lng = Arr::get($_POST, 'lng', $city_lng), array('id'=>'lng')); ?>
         </div>
     </div>
     <div class="pure-control-group">
@@ -172,9 +172,6 @@
 <script>
 $(function(){
 
-  $('#map-selector').click(function() {
-    $('#map').toggle();
-  });
   
   var underground = '<?php echo $u; ?>';
   var underground_platform = '<?php echo $up; ?>';
@@ -182,7 +179,7 @@ $(function(){
   var city_area_shop = '<?php echo $cas; ?>';
 
   function city_list_init(c, selected_c, type, domid) {
-    $.getJSON('<?php echo URL::site("api/get_city"); ?>?type='+type+'&cid='+c, function(data){ 
+    $.getJSON('<?php echo URL::site("api_city/get_city"); ?>?type='+type+'&cid='+c, function(data){ 
       if(data.length != 0) {
         $(domid).empty();
         $.each(data, function(k, v){
@@ -233,7 +230,7 @@ $(function(){
   var map = new BMap.Map("map");
   var marker;
   var point;
-  point = new BMap.Point(<?php echo $lng = Arr::get($_POST, 'lng', $city_lng); ?>, <?php echo $lat = Arr::get($_POST, 'lat', $city_lat); ?>);
+  point = new BMap.Point(<?php echo $lng; ?>, <?php echo $lat; ?>);
   map.centerAndZoom(point, 12);
   map.addControl(new BMap.NavigationControl());  //添加默认缩放平移控件
 
@@ -249,14 +246,14 @@ $(function(){
     bdgps = e.point.lat + "," + e.point.lng;
     $('#lng').val(e.point.lng);
     $('#lat').val(e.point.lat);
-    $.getJSON('<?php echo URL::site('map/getaddress'); ?>?location=' + bdgps,
+    $.getJSON('<?php echo URL::site('api_map/getgeo'); ?>?localtion=' + bdgps,
         function(data){
           if (data.error) {
             alert(data.info);
             return 0;
           }
           else {
-            $('#address').val(data.info);
+            $('#address').val(data.address);
           }
           bdmap_marker(e.point.lng, e.point.lat);
         }
@@ -264,5 +261,23 @@ $(function(){
   }
   map.addEventListener("click", bdmap_click); 
   map.enableScrollWheelZoom(true);
+
+  $('#map-selector').click(function() {
+    address = $('#address').val();
+    if (address) {
+      $.getJSON('<?php echo URL::site('api_map/getgeo'); ?>?reverse=true&localtion='+address, function(data){
+        if(data.error == 0) {
+          point = new BMap.Point(data.lng, data.lat);
+          map.panTo(point);
+          bdmap_marker(data.lng, data.lat);
+        }
+        else {
+          alert('无相关结果');
+        }
+        
+      });
+    }
+  });
+
  });
 </script>

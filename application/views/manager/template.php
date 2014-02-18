@@ -7,6 +7,10 @@
     <?php echo HTML::script('media/jquery.pjax.js'); ?>
     <?php echo HTML::script('http://api.map.baidu.com/api?v=2.0&ak='.$core->bd_map_ak); ?>
     <?php echo HTML::script('media/editor/kindeditor-min.js'); ?>
+    <?php echo HTML::script('media/swfupload/swfupload.js'); ?>
+    <?php echo HTML::script('media/swfupload/swfupload.queue.js'); ?>
+    <?php echo HTML::script('media/swfupload/fileprogress.js'); ?>
+    <?php echo HTML::script('media/swfupload/handlers.js'); ?>
     <?php echo HTML::style('media/pure-min.css'); ?>
     <?php echo HTML::style('media/awesome/font-awesome.min.css'); ?>
     <?php echo HTML::style('media/manager.css'); ?>
@@ -55,7 +59,7 @@
       <?php if (isset($message)) :?>
         <?php if (isset($message['error']) ) :?>
         <div class="info info-<?php echo $message['error'] ? 'error': 'success'; ?>">
-          <?php  echo $message['info'] == ''? ( $message['error'] ? '执行错误' : '执行成功'  ) : $message['info'] ?>
+          <?php  echo ( isset($message['info']) && $message['info'] <> '' ) ? $message['info'] : ( $message['error'] ? '执行错误' : '执行成功'  ); ?>
         </div>
         <?php else: ?>
         <div class="info info-warning"><?php  echo $message; ?></div>

@@ -20,11 +20,11 @@ abstract class Controller_Manager_Template extends Controller_Template {
    */
   public function before()
   {
+    parent::before();
     $this->user = Session::instance()->get('manager.user', NULL);
     if ($this->user === NULL) {
       $this->redirect('manager_sigin');
     }
-    parent::before();
     $this->pagination = Kohana::$config->load('pagination.manager');
   }
 

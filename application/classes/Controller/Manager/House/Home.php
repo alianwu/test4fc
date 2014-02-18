@@ -43,7 +43,6 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   public function action_editor()
   {
     $data = $this->model->get_house_one($this->hid);
-
     if($data === FALSE) {
       throw new Kohana_HTTP_Exception_404();
     }
@@ -174,6 +173,10 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
       $data = $post->as_array();
       $ret = $this->model->save($data);
       $this->template->set_global('message', $ret);
+      if ($ret['error'] == FALSE) {
+        $this->action_update_success($ret['data']);
+        return 0;
+      }
     }
     else {
       $error = $post->errors('city/add');
@@ -182,7 +185,27 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     
     $this->action_add();
   }
+  
 
+  public function action_update_success($hid = NULL)
+  {
+    $this->template->container->detail = View::factory('manager/house/house_add_success')
+                                              ->set('hid', $hid);
+  }
+
+  public function action_attachment($hid = NULL)
+  {
+    $hid = Arr::get($_GET, 'hid', $hid);
+    $attachment = $this->model->get_house_one($hid);
+    if ($attachment) {
+      $this->template->container->detail = View::factory('manager/house/house_attachment')
+        ->set('hid', $hid)
+        ->set('attachment', $attachment);
+    }
+    else {
+      throw new Kohana_HTTP_Exception_404();
+    }
+  }
   public function action_display()
   {
     $data = $this->model->update_display($this->hid);

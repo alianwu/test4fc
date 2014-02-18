@@ -16,12 +16,12 @@ class Controller_Manager_User extends Controller_Manager_Template {
   public function action_update()
   {
     $post = Validation::factory( Arr::extract($_POST, 
-                                  array('id', 'name', 'oldpassword', 'password', 'repassword', 'csrf')) );
+                                  array('id', 'username', 'oldpassword', 'password', 'repassword', 'csrf')) );
     $post->rules('id', array(
           array('digit'),
           array('not_empty'),
         ))
-        ->rules('name', array(
+        ->rules('username', array(
           array('not_empty'),
           array('max_length', array(':value', 30)),
           array('min_length', array(':value', 3))
@@ -52,9 +52,10 @@ class Controller_Manager_User extends Controller_Manager_Template {
     else {
       $error = $post->errors('user');
       $this->template->bind_global('error', $error);
+      $this->template->set_global('message', array('error'=>TRUE));
     }
     
-    $this->action_add();
+    $this->action_index();
   }
 
 
