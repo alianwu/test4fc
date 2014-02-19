@@ -48,7 +48,7 @@ abstract class Controller_Template extends Controller {
     $this->model_city = Model::factory('City');
     $this->city_pretty = $this->model_city->get_city_pretty();
 
-    $this->user = $this->get_user();
+    $this->user = $this->get_user('member.user');
     $this->city_id = $this->get_city_id();
     $this->city_area = $this->model_city->get_city_pretty($this->city_id);
     $this->city_cache = $this->model_city->get_city_cache();
@@ -70,9 +70,15 @@ abstract class Controller_Template extends Controller {
     }
   }
 
-  public function get_user()
+  public function check_user()
   {
-    return array('_id'=> 1, '_name'=>'测试'); 
+   return $this->user !== NULL; 
+  }
+
+  public function get_user($session_name)
+  {
+    $user = Session::instance()->get($session_name, NULL);
+    return $user;
   }
 
   public function get_city_id()

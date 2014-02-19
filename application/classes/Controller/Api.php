@@ -11,6 +11,11 @@ abstract class Controller_Api extends Controller_Template {
     parent::before();
   }
 
+  public function action_error()
+  {
+    $this->body['data'] = 'requre user login';
+  }
+
   public function after()
   {
     parent::after();

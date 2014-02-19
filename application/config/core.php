@@ -7,8 +7,4 @@ return array(
   'version' => 'Version 0.1',
   
   'upload_dir' => 'data',
-
-  'bd_map_id' => '2217422',
-  'bd_map_ak' => 'Yv4XXgmzr2y53cbkSvis9Qmn',
-  'bd_map_key' => 'l6edpNpTOiWHTiAtrMWH9mgM0eiOgXy0'
 );

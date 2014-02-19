@@ -21,7 +21,7 @@ abstract class Controller_Manager_Template extends Controller_Template {
   public function before()
   {
     parent::before();
-    $this->user = Session::instance()->get('manager.user', NULL);
+    $this->user = $this->get_user('manager.user');
     if ($this->user === NULL) {
       $this->redirect('manager_sigin');
     }

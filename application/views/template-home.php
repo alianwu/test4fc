@@ -12,7 +12,7 @@
     </div>
   </div>
   <div class="pure-u-1">
-    <div class="pure-u-1-6"><?php echo HTML::anchor('house', '新房'); ?></div>
+    <div class="pure-u-1-6"><?php echo HTML::anchor('house_home', '新房'); ?></div>
   </div>
   <div class="pure-u-1">
   <?php if (isset($container)) : ?>

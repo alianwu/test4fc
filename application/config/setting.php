@@ -1,6 +1,10 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 return array(
+  'model' => array(
+      1 => '新房',
+      2 => '资讯',
+    ),
   'type' => array(
       0  => '全局',
       1  => '区域',

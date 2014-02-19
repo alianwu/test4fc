@@ -2,15 +2,15 @@
     <?php echo Form::open('house/search/');?>
     <?php echo Form::input('key', Arr::get($_GET, 'key', ''), array('method'=>'get')); ?>
     <button class="pure-button">搜索</button>
-    <?php echo HTML::anchor('house/search', '高级'); ?>
+    <?php echo HTML::anchor('house_home/search', '高级'); ?>
     </form>
   </div>
   <div class="pure-u-1">
     <?php foreach($city_area as $k=>$v) : ?><div class="pure-u-1-4"><?php echo HTML::anchor('home/search/'.$k.'.html', $v); ?></div><?php endforeach; ?>
   </div>
   <div class="pure-u-1">
-    <?php echo HTML::anchor('house/search/'.URL::query(array('output'=>'near'), TRUE), '附近新房'); ?>
-    <?php echo HTML::anchor('house/search/'.URL::query(array('output'=>'hot'), TRUE), '推荐新房'); ?>
+    <?php echo HTML::anchor('house_search/search/'.URL::query(array('output'=>'near'), TRUE), '附近新房'); ?>
+    <?php echo HTML::anchor('house_search/search/'.URL::query(array('output'=>'hot'), TRUE), '推荐新房'); ?>
   </div>
   <div class="pure-u-1">
     <?php if ( isset($house) && $house) : ?> 

@@ -16,3 +16,7 @@
   <?php if (isset($alert) && empty($alert) == FALSE): ?>
   <div class="pure-u-1"><?php echo $alert; ?></div>
   <?php endif; ?>
+  <?php echo isset($container)?$container:NULL; ?>
+</script>
+</body>
+</html>

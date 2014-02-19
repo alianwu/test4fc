@@ -41,7 +41,7 @@ class Model_House_New extends Model {
 
   }
 
-  public function get_house_search()
+  public function get_search($data)
   {
     $ret = array('total' => 0, 'data' => NULL);
 

@@ -18,14 +18,6 @@ class Controller_House_Home extends Controller_Template {
     $this->template->container = $view;
   }
 
-  public function action_search()
-  {
-    $house = $this->model_house->get_house_front($this->city_id, 1);
-    $view =  View::factory('house/index');
-    $view->bind_global('house', $house);
-    $this->template->container = $view;
-  }
-
   public function action_near()
   {
     $view =  View::factory('house/near');
