@@ -25,6 +25,11 @@ abstract class Controller_Manager_Template extends Controller_Template {
     if ($this->user === NULL) {
       $this->redirect('manager_sigin');
     }
+
+    if ($this->auto_render == TRUE) {
+      $map = Kohana::$config->load('map.baidu');
+      $this->template->bind_global('map', $map);
+    }
     $this->pagination = Kohana::$config->load('pagination.manager');
   }
 

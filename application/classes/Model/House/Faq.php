@@ -9,7 +9,7 @@ class Model_House_Faq extends Model {
     $this->pagination = Kohana::$config->load('pagination');
   }
 
-  public function get_faq($city_id, $page = 0)
+  public function get_list($city_id, $page = 0)
   {
     $pagination = Kohana::$config->load('pagination.manager');
     $query = DB::query(Database::SELECT, 'SELECT count(*) FROM house_faq WHERE city_id=:city_id')
@@ -18,7 +18,7 @@ class Model_House_Faq extends Model {
               ->execute();
     $ret['total'] = $query->get('count', 0);
     $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
-                WHERE city_id=:city_id ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
+                WHERE city_id=:city_id ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))
@@ -28,10 +28,10 @@ class Model_House_Faq extends Model {
     return $ret;
   } 
 
-  public function get_faq_front($hid, $page = 1)
+  public function get_list_front($hid, $page = 1)
   {
     $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
-                WHERE hid=:hid AND display=true ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
+                WHERE hid=:hid AND display=true ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param(':hid', $hid)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
@@ -40,7 +40,7 @@ class Model_House_Faq extends Model {
     return $query->count() == 0 ? NULL : $query;
   } 
   
-  public function get_faq_one_front($fid)
+  public function get_one_front($fid)
   {
     $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
                 WHERE fid=:fid and display=true LIMIT 1 ')
@@ -56,6 +56,7 @@ class Model_House_Faq extends Model {
     $query = DB::query(Database::INSERT, 'INSERT INTO house_faq(hid, question, mid, username)
                 VALUES (:hid, :question, :mid, :username) ')
               ->param(':hid', $data['hid'])
+              ->param(':city_id', $data['city_id'])
               ->param(':question', $data['question'])
               ->param(':mid', $data['_id'])
               ->param(':username', $data['_name'])
@@ -63,4 +64,27 @@ class Model_House_Faq extends Model {
     return $query;
   }
 
+  public function display($fid)
+  {
+    $ret = array('error'=>TRUE, 'info'=>'');
+    $query = DB::query(Database::UPDATE, 'UPDATE house_faq SET display= NOT display  WHERE fid=:fid')
+              ->param(':fid', $fid)
+              ->execute();
+    if ($query) {
+      $ret['error'] = FALSE;
+    }
+    return $ret;
+  }
+
+  public function delete($fid)
+  {
+    $ret = array('error'=>TRUE, 'info'=>'');
+    $query = DB::query(Database::DELETE, 'DELETE FROM house_faq  WHERE fid=:fid')
+              ->param(':fid', $fid)
+              ->execute();
+    if ($query) {
+      $ret['error'] = FALSE;
+    }
+    return $ret;
+  }
 }

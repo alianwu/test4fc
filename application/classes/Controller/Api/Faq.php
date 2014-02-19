@@ -42,7 +42,7 @@ class Controller_Api_Faq extends Controller_Api {
     }
 
     $post = Validation::factory( Arr::extract($_POST, 
-                                              array('question', 'hid')) );
+                                              array('body', 'hid')) );
     $post->rules('question', array(
             array('trim'),
             array('not_empty'),
@@ -54,7 +54,7 @@ class Controller_Api_Faq extends Controller_Api {
           array('digit'),
         ));
     if ($post->check()) {
-      $data = $post->as_array() + $this->user;
+      $data = $post->as_array() + $this->user + array('city_id'=>$this->city_id);
       $ret = Model::factory('House_Faq')->save($data);
       if ($ret) {
         $this->body['error'] = 0;
