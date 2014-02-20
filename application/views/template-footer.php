@@ -1,26 +1,39 @@
 <script>
+  var cookie_geo = 'geo_position_2';
+  var now = new Date();
+
   $(function(){
-    var is_mobile  = navigator.platform.match(/(Arm|iPhone|Android|iPod|iPad)/i)?true:false;
-    var need_geo_position = $.cookie('need_geo_position');
-    if(typeof(need_geo_position) == 'undefined' && geo_position_js.init()) {
-      geo_position_js.getCurrentPosition( function(p) {
-          lat = p.coords.latitude;
-          lng = p.coords.longitude;
-          localtion = p.coords.latitude + ','+p.coords.longitude; 
-          $.getJSON('<?php echo URL::site('map/getaddress'); ?>?location='+localtion, function(data){
-            if(data.error == 0) {
-              $.cookie('need_geo_position', '1', { expires: 7 });
-              window.location.href = '<?php echo URL::site('home/set_citystr'); ?>?str='+data.city;
-            }
-            else {
-              alert(data.info);
-            }
-          });
-        }, function() {
-              $.cookie('need_geo_position', '1', { expires: 1 });
-              alert('位置请求被被拒绝');
-            }, {enableHighAccuracy:true});
+    c_g = $.cookie(cookie_geo);
+    if(c_g == undefined) {
+      if (geo_position_js.init()) {
+        geo_position_js.getCurrentPosition( function(p) {
+            lat = p.coords.latitude;
+            lng = p.coords.longitude;
+            localtion = lat + ',' + lng;
+            $.getJSON('<?php echo URL::site('api_city/set_city'); ?>?localtion='+localtion, function(data){
+              if(data.error == 0) {
+                if (data.data != 0) {
+                  window.location.reload();
+                }
+              }
+              else {
+                alert('没有当前城市记录'+localtion);
+              }
+            });
+          }, function(e) {
+              alert(e.message);
+          }, { enableHighAccuracy:true }
+        );
+      }
+      $.cookie(cookie_geo, now.getTime(), { expires: 7 });
     }
+    else {
+      // alert('error');
+    }
+
+
+
+    var is_mobile  = navigator.platform.match(/(Arm|iPhone|Android|iPod|iPad)/i)?true:false;
     if (is_mobile == false) {
       $('.phone').click(function(){
         alert( $(this).attr('data-phone'));

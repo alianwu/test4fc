@@ -41,7 +41,7 @@ class Model_House_New extends Model {
 
   }
 
-  public function get_search($data)
+  public function get_search_front($data, $page)
   {
     $ret = array('total' => 0, 'data' => NULL);
 

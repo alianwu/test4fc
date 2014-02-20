@@ -20,6 +20,17 @@ class Model_City extends Model {
     return $query->as_array('cid', $key);
   }
 
+  public function get_city_from_value($value)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city 
+                  WHERE value=:value AND type=1 AND display=:display LIMIT 1')
+              ->param(':display', TRUE)
+              ->param(':value', $value)
+              ->param(':type', 1)
+              ->execute();
+    return $query->count() == 0? NULL:$query->current();
+  }
+
   public function get_city_pretty($parent = 0, $type = 1, $output = 1)
   {
     $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:parent_cid AND type=:type')

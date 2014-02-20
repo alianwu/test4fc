@@ -21,7 +21,7 @@ abstract class Controller_Template extends Controller {
   public $city_pretty = NULL;
   public $city_cache = NULL;
   public $city_area = NULL;
-  public $city_id = 0;
+  public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
   public $pagination = NULL;
@@ -49,7 +49,9 @@ abstract class Controller_Template extends Controller {
     $this->city_pretty = $this->model_city->get_city_pretty();
 
     $this->user = $this->get_user('member.user');
-    $this->city_id = $this->get_city_id();
+
+    $this->initialize_city();
+
     $this->city_area = $this->model_city->get_city_pretty($this->city_id);
     $this->city_cache = $this->model_city->get_city_cache();
     $this->core = Kohana::$config->load('core');
@@ -61,6 +63,8 @@ abstract class Controller_Template extends Controller {
     {
       // Load the template
       $this->template = View::factory($this->template);
+      $map = Kohana::$config->load('map.baidu');
+      $this->template->bind_global('map', $map);
       $this->template->bind_global('core', $this->core);
       $this->template->bind_global('setting', $this->setting);
       $this->template->bind_global('user', $this->user);
@@ -81,13 +85,57 @@ abstract class Controller_Template extends Controller {
     return $user;
   }
 
-  public function get_city_id()
+  public function initialize_city($id = NULL)
   {
     $city_id = (int) Cookie::get('city_id');
-    if(isset($this->city_pretty[$city_id])) {
-      return $city_id;
+    if ($id !== NULL) { 
+      $this->city_id = $id;
+      if($id == $city_id) {
+        return FALSE;
+      }
     }
-    return 1;
+    elseif  ($city_id <> 0 
+        && isset($this->city_pretty[$city_id])) {
+      $this->city_id = $city_id;
+      $city_lat = Cookie::get('city_lat');
+      $city_lng = Cookie::get('city_lng');
+      if (is_numeric($city_lat) && is_numeric($city_lng)) {
+        $this->city_lng = $city_lng;
+        $this->city_lat = $city_lat;
+        return FALSE;
+      }
+    }
+    elseif ( $v = Arr::get($_SERVER, 'GEOIP_CITY') ) {
+      $ret = $this->model_city->get_city_from_value($v);
+      if ($ret) {
+        $this->city_id = $ret->get('cid');
+        $this->city_lng = Arr::get($_SERVER, 'GEOIP_LONGITUDE');
+        $this->city_lat = Arr::get($_SERVER, 'GEOIP_LATITUDE');
+        return TRUE;
+      }
+    }
+    else { }
+
+    $cache_name = 'geo_city_id_'.$this->city_id;
+    $geo = Cache::instance()->get($cache_name, FALSE);
+    if ($geo) {
+      $this->city_lng = $geo['lng'];
+      $this->city_lat = $geo['lat'];
+    }
+    else {
+      $geo = Map::instance()->geocoder($this->city_pretty[$this->city_id], TRUE);
+      if($geo && isset($geo->result->location->lng) && $geo->result->location->lng <> '')
+      {
+        $this->city_lng = $geo->result->location->lng;
+        $this->city_lat = $geo->result->location->lat;
+        Cache::instance()->set($cache_name, array('lng'=>$this->city_lng, 'lat'=>$this->city_lat));
+      } 
+    }
+
+    Cookie::set('city_id', $this->city_id);
+    Cookie::set('city_lat', $this->city_lat);
+    Cookie::set('city_lng', $this->city_lng);
+    return TRUE;
   }
 
   /**

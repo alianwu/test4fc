@@ -5,7 +5,9 @@
     <link rel="shortcut icon" href="/media/favicon.ico?ver=0.1" /> 
     <?php echo HTML::script('media/jquery-2.0.2.min.js'); ?>
     <?php echo HTML::script('media/jquery.pjax.js'); ?>
+    <?php echo HTML::script('http://api.map.baidu.com/api?v=2.0&ak='.$map['map_ak']); ?>
     <?php echo HTML::script('media/geo-min.js'); ?>
+    <?php echo HTML::script('media/bdconvertor.js'); ?>
     <?php echo HTML::script('media/jquery.cookie.js'); ?>
     <?php echo HTML::style('media/pure-min.css'); ?>
     <?php echo HTML::style('media/awesome/font-awesome.min.css'); ?>

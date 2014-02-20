@@ -76,7 +76,11 @@
   $(function(){
     $('#city-selector').change(function(){ 
       city_id = $(this).val(); 
-      window.location.href='<?php echo URL::site('manager_home/set_cityid'); ?>/'+city_id; 
+      $.getJSON('<?php echo URL::site('api_city/set_city'); ?>/'+city_id, function(data){
+        if (data.error == 0) {
+          window.location.reload();
+        }  
+      });
     });
     $.pjax({
         selector: 'a.pjax', container: '#detail', show: 'fade', cache: false,storage: true

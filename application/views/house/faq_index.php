@@ -7,7 +7,7 @@
   <?php foreach($faq as $v): ?>
     <ul id='faq_list'>
       <li>
-          <?php echo $v->question; ?>
+          <?php echo $v->body; ?>
           回答：<?php echo $v->count?$v->count:'没有'; ?>
           <?php echo date('Y-m-d H:i', strtotime($v->created)); ?>
           <?php echo HTML::anchor('house_faq/detail/'.$v->fid.'.html', '回答'); ?>

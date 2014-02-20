@@ -6,11 +6,11 @@
     </form>
   </div>
   <div class="pure-u-1">
-    <?php foreach($city_area as $k=>$v) : ?><div class="pure-u-1-4"><?php echo HTML::anchor('home/search/'.$k.'.html', $v); ?></div><?php endforeach; ?>
+    <?php foreach($city_area as $k=>$v) : ?><div class="pure-u-1-4"><?php echo HTML::anchor('search'.URL::query(array('city_area'=> $k, 'type'=>1), TRUE), $v); ?></div><?php endforeach; ?>
   </div>
   <div class="pure-u-1">
-    <?php echo HTML::anchor('house_search/search/'.URL::query(array('output'=>'near'), TRUE), '附近新房'); ?>
-    <?php echo HTML::anchor('house_search/search/'.URL::query(array('output'=>'hot'), TRUE), '推荐新房'); ?>
+    <?php echo HTML::anchor('search'.URL::query(array('output'=>'near'), TRUE), '附近新房'); ?>
+    <?php echo HTML::anchor('search'.URL::query(array('output'=>'hot'), TRUE), '推荐新房'); ?>
   </div>
   <div class="pure-u-1">
     <?php if ( isset($house) && $house) : ?> 
@@ -39,6 +39,34 @@
     <?php endif; ?>
   </div>
   <div class="pure-u-1">
-    <?php echo HTML::anchor('house_home/near'.URL::query(array('output'=>'near'), TRUE), '精准房源'); ?>
+    <?php echo HTML::anchor('#', '精准房源', array('id'=>'house_near')); ?>
   </div>
+<script>
+$(function(){
+  $('#house_near').click(function(){
+    if (geo_position_js.init()) {
+      geo_position_js.getCurrentPosition( function(p) {
+          var lat = p.coords.latitude;
+          var lng = p.coords.longitude;
+          localtion = lat + ',' + lng;
+          $.getJSON('<?php echo URL::site('api_city/set_city'); ?>?localtion='+localtion, function(data){
+            if(data.error == 0) {
+              window.location.href = '<?php echo URL::site('house_home/near'); ?>?lat=' + lat + '&lng=' + lng + '&radius=2500';
+            }
+            else {
+              alert('没有当前城市记录'+localtion);
+            }
+          });
+        }, function(e) {
+            alert(e.message);
+        }, { enableHighAccuracy:true }
+      );
+    }
+    else {
+      alert('error');
+    }
+    return false;
+  });
+});
+</script>
 </div>

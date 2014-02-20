@@ -30,7 +30,7 @@ class Model_House_Faq_Detail extends Model {
   
   public function get_list_front($fid, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq_detail_detail
+    $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq_detail
                 WHERE fid=:fid and display=true ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
               ->param(':fid', $fid)
               ->param(':num', $this->pagination->default['items_per_page'])
