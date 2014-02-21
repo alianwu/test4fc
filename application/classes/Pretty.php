@@ -8,7 +8,7 @@ class Pretty {
     if (empty($str) || $str == '{}') {
       return $ret;
     }
-    $ret = explode(',', mb_substr($str, 1, -1));
+    $ret = explode(',', UTF8::substr($str, 1, -1));
     return $ret;
   }
 

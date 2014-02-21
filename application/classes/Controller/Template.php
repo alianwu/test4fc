@@ -17,6 +17,7 @@ abstract class Controller_Template extends Controller {
 
   public $core = NULL;
   public $setting = NULL;
+
   public $user = NULL;
   public $city_pretty = NULL;
   public $city_cache = NULL;
@@ -27,6 +28,8 @@ abstract class Controller_Template extends Controller {
   public $pagination = NULL;
   public $token = '';
   public $alert = '';
+  public $message = array('error'=>1, 'info'=>'');
+  public $model;
 
   /**
    * @var  boolean  auto render template

@@ -132,7 +132,9 @@ Kohana::modules(array(
 	// 'mangodb'    => MODPATH.'mangodb',    // 
 	   'captcha'    => MODPATH.'captcha',    // 
 	   'pagination' => MODPATH.'pagination', // 
-	   'accounts'   => MODPATH.'accounts',     // 
+     'accounts'   => MODPATH.'accounts',   // 
+	   'article'    => MODPATH.'article',    // 
+	   'purifier'   => MODPATH.'purifier',   // 
 	));
 
 Cache::$default  = 'file';

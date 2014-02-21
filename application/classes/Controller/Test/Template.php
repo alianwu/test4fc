@@ -19,6 +19,7 @@ abstract class Controller_Test_Template extends Controller {
    * @var  boolean  auto render template
    **/
   public $auto_render = TRUE;
+  public $model;
   
   /**
    * Loads the template [View] object.
