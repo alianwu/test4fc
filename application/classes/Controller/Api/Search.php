@@ -15,8 +15,7 @@ class Controller_Api_Search extends Controller_Api {
     }
 
 
-    $this->body['error'] = 0;
-    $this->body['data'] = $data;
+    $this->result(0, $data->as_array())
   
   }
 

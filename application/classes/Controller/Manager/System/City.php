@@ -10,7 +10,7 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
   {
     parent::before();
     
-    $this->model = Model::factory('City');
+    $this->model = $this->model_city;;
 
     $this->type = (int) Arr::get($_GET, 'type', $this->type);
     $this->cid  = (int) Arr::get($_GET, 'cid', 0);
@@ -85,9 +85,9 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
         ->rules('display', array());
 
     if( $post->check() ) {
-      $data = $post->as_array();
-      $ret = $this->model->save($data);
-      $this->template->set_global('message', $ret);
+      $data = $post->data();
+      $ret = $this->model->save_one($data);
+      $this->result($ret);
     }
     else {
       $error = $post->errors('city/add');
@@ -99,15 +99,15 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
 
   public function action_display()
   {
-    $data = $this->model->update_display($this->cid);
-    $this->template->bind_global('message', $data);
+    $ret = $this->model->display_one($this->cid);
+    $this->result($ret);
     $this->action_index();
   }
 
   public function action_delete()
   {
-    $data = $this->model->delete($this->cid);
-    $this->template->bind_global('message', $data);
+    $ret = $this->model->delete_one($this->cid);
+    $this->result($ret);
     $this->action_index();
   }
 

@@ -78,10 +78,10 @@ abstract class Map {
 		return $this;
 	}
 
-  public function get_city_from_ip() {
+  public function getgeo_ip() {
   
   }
 
-  abstract public function getgeo($localtion, $reverse) ;
+  abstract public function getgeo($location, $reverse) ;
 
 } // End Map

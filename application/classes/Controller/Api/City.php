@@ -6,7 +6,10 @@ class Controller_Api_City extends Controller_Api {
   {
     $cid = Arr::get($_GET, 'cid', 0);
     $type = Arr::get($_GET, 'type', 0);
-    $this->body = $this->model_city->get_city_pretty($cid, $type);
+    $data = $this->model_city->get_city_pretty($cid, $type);
+    if ($data) {
+      $this->result(0, $data);
+    }
   }
 
   public function action_set_city()
@@ -15,20 +18,19 @@ class Controller_Api_City extends Controller_Api {
     if(isset($_GET['name'])) {
       $id = Arr::get($_GET, 'name', '');
     }
-    elseif(isset($_GET['localtion'])) {
-      $id = Arr::get($_GET, 'localtion', '');
+    elseif(isset($_GET['location'])) {
+      $id = Arr::get($_GET, 'location', '');
     }
     else {
       $id = $this->request->param('id');
     }
 
     if ($id && ($city_id = $this->check_exist_city($id)))  {
-      $this->body['error'] = 0;
-      $this->body['data'] = $city_id;
+      $this->result(0, $city_id);
       $this->city_id = $city_id;
       $ret = $this->initialize_city($this->city_id);
       if ($ret == FALSE) {
-        $this->body['data'] = 0;
+        $this->result(0, 0);
       }
     }
   }

@@ -15,9 +15,9 @@ class Map_Baidu extends Map {
                     'ak'       => $this->_config['map_ak'],
                   );
   }
-  public function getgeo($localtion, $reverse=TRUE)
+  public function getgeo($location, $reverse=TRUE)
   {
-    $data = $this->geocoder($localtion, $reverse);
+    $data = $this->geocoder($location, $reverse);
     if ($data) {
       $this->_output['lat'] = $data->result->location->lat;
       $this->_output['lng'] = $data->result->location->lng;
@@ -35,7 +35,7 @@ class Map_Baidu extends Map {
       }
       return $this->_output;
     }
-    return FALSE;
+    return NULL;
   }
 
   public function geocoder($geo, $reverse = FALSE) {
@@ -61,7 +61,7 @@ class Map_Baidu extends Map {
     if ($data && isset($data->status) && $data->status == 0) {
       return $data;
     }
-    return FALSE;
+    return NULL;
 
   }
 

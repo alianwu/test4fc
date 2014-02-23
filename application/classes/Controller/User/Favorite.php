@@ -4,6 +4,8 @@ class Controller_User_Favorite extends Controller_Template {
   
   public $template = 'template-home';
 
+  protected $model_house;
+
   public function before()
   {
     parent::before();

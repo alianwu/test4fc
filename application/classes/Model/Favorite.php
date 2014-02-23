@@ -4,7 +4,7 @@ class Model_Favorite {
 
   function __construct()
   {
-    $this->pagination = Kohana::$config->load('pagination.default');
+    $this->pagination = Kohana::$config->load('pagination');
   }
 
   public function get_list($mid, $type, $page)
@@ -13,15 +13,15 @@ class Model_Favorite {
                 WHERE mid=:mid and type=:type  ORDER BY created DESC LIMIT :num OFFSET :start ')
               ->param(':type', $type)
               ->param(':mid', $mid)
-              ->param(':num', $this->pagination['items_per_page'])
-              ->param(':start', $this->pagination['items_per_page'] * ($page-1))
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL : $query;
 
   }
 
-  public function save($data)
+  public function save_one($data)
   {
     $query = DB::query(Database::INSERT, 'INSERT INTO favorite (uid, type, id, name) 
                   VALUES(:uid, :type, :id, :name)')
@@ -30,16 +30,16 @@ class Model_Favorite {
               ->param(':id', $data['id'])
               ->param(':name', $data['name'])
               ->execute();
-    return $query;
+    return $query?TRUE:FALSE;
     
   }
 
-  public function delete($fid)
+  public function delete_one($fid)
   {
     $query = DB::query(Database::DELETE, 'DELETE FROM favorite  WHERE fid=:fid')
               ->param(':fid', $fid)
               ->execute();
-    return $query;
+    return $query?TRUE:FALSE;
   }
 
 }

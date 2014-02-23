@@ -6,8 +6,8 @@ class Controller_Api_Faq extends Controller_Api {
   {
     parent::before();
 
-    $this->model_faq = Model::factory('House_Faq');
-    $this->model_faq_detail = Model::factory('House_Faq_Detail');
+    $this->model = Model::factory('House_Faq');
+    $this->model_detail = Model::factory('House_Faq_Detail');
   }
 
   public function action_list()
@@ -15,9 +15,9 @@ class Controller_Api_Faq extends Controller_Api {
     $page = (int) Arr::get($_GET, 'page', 1);
     $hid  = (int) Arr::get($_GET, 'hid', 1);
     if ($hid <> 0 && $page <> 0) {
-      $data = $this->model_faq->get_faq_front($hid, $page);
+      $data = $this->model->get_list_front($hid, $page);
       if($data) {
-        $this->body['data'] = $data->as_array();
+        $this->result(0, $data->as_array());
       }
     }
   }
@@ -27,9 +27,9 @@ class Controller_Api_Faq extends Controller_Api {
     $page = (int) Arr::get($_GET, 'page', 1);
     $fid  = (int) Arr::get($_GET, 'fid', 1);
     if ($hid <> 0 && $page <> 0) {
-      $data = $this->model_faq_detail->get_faq_front($fid, $page);
+      $data = $this->model_detail->get_list_front($fid, $page);
       if($data) {
-        $this->body['data'] = $data->as_array();
+        $this->result(0, $data->as_array());
       }
     }
   }
@@ -37,8 +37,7 @@ class Controller_Api_Faq extends Controller_Api {
   public function action_save()
   {
     if ($this->user == NULL) {
-      $this->body['data'] = 'require login!';
-      return 0;
+      $this->redirect('api/error');
     }
 
     $post = Validation::factory( Arr::extract($_POST, 
@@ -54,25 +53,19 @@ class Controller_Api_Faq extends Controller_Api {
           array('digit'),
         ));
     if ($post->check()) {
-      $data = $post->as_array() + $this->user + array('city_id'=>$this->city_id);
-      $ret = Model::factory('House_Faq')->save($data);
-      if ($ret) {
-        $this->body['error'] = 0;
-      }
-      else {
-        $this->body['data'] = 'Database error!';
-      }
+      $data = $post->data() + $this->user + array('city_id'=>$this->city_id);
+      $ret = $this->model->save_one($data);
+      $this->result($ret);
     }
     else {
-      $this->body['data'] = $post->errors('house/faq');
+      $this->result(NULL, $post->errors('house/faq'));
     }
   }
 
   public function action_detail_save()
   {
     if ($this->user == NULL) {
-      $this->body['data'] = 'require login!';
-      return 0;
+      return $this->error_user();
     }
 
     $post = Validation::factory( Arr::extract($_POST, 
@@ -88,17 +81,12 @@ class Controller_Api_Faq extends Controller_Api {
           array('digit'),
         ));
     if ($post->check()) {
-      $data = $post->as_array() + $this->user;
-      $ret = Model::factory('House_Faq_Detail')->save($data);
-      if ($ret) {
-        $this->body['error'] = 0;
-      }
-      else {
-        $this->body['data'] = 'Database error!';
-      }
+      $data = $post->data() + $this->user;
+      $ret = $this->model_detail->save_one($data);
+      $this->result($ret);
     }
     else {
-      $this->body['data'] = $post->errors('house/faq');
+      $this->result(NULL, $post->errors('house/faq'));
     }
   }
 

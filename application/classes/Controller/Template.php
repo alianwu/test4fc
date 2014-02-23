@@ -27,8 +27,7 @@ abstract class Controller_Template extends Controller {
   public $city_lat = '39.915';
   public $pagination = NULL;
   public $token = '';
-  public $alert = '';
-  public $message = array('error'=>1, 'info'=>'');
+  public $result = array('status'=>1, 'data'=>NULL);
   public $model;
 
   /**
@@ -60,6 +59,7 @@ abstract class Controller_Template extends Controller {
     $this->core = Kohana::$config->load('core');
     $this->setting = Kohana::$config->load('setting');
     $this->token = Security::token();
+
     $this->pagination = Kohana::$config->load('pagination.default');
 
     if ($this->auto_render === TRUE)
@@ -82,7 +82,7 @@ abstract class Controller_Template extends Controller {
    return $this->user !== NULL; 
   }
 
-  public function get_user($session_name)
+  public function get_user($session_name = 'user')
   {
     $user = Session::instance()->get($session_name, NULL);
     return $user;
@@ -141,6 +141,31 @@ abstract class Controller_Template extends Controller {
     return TRUE;
   }
 
+  public function result($status = NULL, $data = NULL, $extra = NULL)
+  {
+    if ($status === FALSE) {
+      $this->result['status'] = 1;
+    }
+    elseif ($status === TRUE) {
+      $this->result['status'] = 0;
+    }
+    elseif ($status === NULL) {
+      // pass
+    }
+    else {
+      $this->result['status'] = (int) $status;
+    }
+    $this->result['data']  = $data;
+    if (is_array($extra)) {
+      $this->result = array_merge($this->result, $extra); 
+    }
+
+    if ($this->auto_render == TRUE) {
+      $this->template->bind_global('result', $this->result);
+    }
+  }
+
+
   /**
    * Assigns the template [View] as the request response.
    */
@@ -155,7 +180,6 @@ abstract class Controller_Template extends Controller {
       $this->template->set_global('city_lng', $this->city_lng);
       $this->template->set_global('city_lat', $this->city_lat);
       $this->template->set_global('token', $this->token);
-      $this->template->set_global('alert', $this->alert);
       $this->template->set_global('pagination', $this->pagination);
       $this->response->body($this->template->render());
     }

@@ -7,12 +7,12 @@ class Controller_House_Home extends Controller_Template {
   public function before()
   {
     parent::before();
-    $this->model_house = Model::factory('House_New');
+    $this->model = Model::factory('House_New');
   }
 
   public function action_index()
   {
-    $house = $this->model_house->get_house_front($this->city_id, 1);
+    $house = $this->model->get_list_front($this->city_id, 1);
     $view =  View::factory('house/index');
     $view->bind_global('house', $house);
     $this->template->container = $view;
@@ -27,7 +27,7 @@ class Controller_House_Home extends Controller_Template {
   public function action_detail()
   {
     $hid = (int) $this->request->param('id');
-    $data = $this->model_house->get_house_one_front($hid);
+    $data = $this->model->get_one_front($hid);
     if ($data == NULL) {
       throw new Kohana_HTTP_Exception_404();
     }

@@ -17,7 +17,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   public function action_index()
   {
     $page = Arr::get($_GET, 'page', 1);
-    $house = $this->model->get_house($this->city_id, $page);
+    $house = $this->model->get_list($this->city_id, $page);
 
     $view = View::factory('manager/house/house_index');
     $view->bind('house', $house);
@@ -28,7 +28,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   public function action_search()
   { 
     $key = Arr::get($_GET, 'key');
-    $house = $this->model->get_house_search($this->city_id, $key);
+    $house = $this->model->get_search($this->city_id, $key);
     $view = View::factory('manager/house/house_index');
     $this->template->container->detail = $view;
   }
@@ -42,7 +42,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   
   public function action_editor()
   {
-    $data = $this->model->get_house_one($this->hid);
+    $data = $this->model->get_one($this->hid);
     if($data === FALSE) {
       throw new Kohana_HTTP_Exception_404();
     }
@@ -170,12 +170,16 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
       $post->rules($k, $v);
     }
     if( $post->check() ) {
-      $data = $post->as_array();
-      $ret = $this->model->save($data);
-      $this->template->set_global('message', $ret);
-      if ($ret['error'] == FALSE) {
-        $this->action_update_success($ret['data']);
+      $data = $post->data();
+      $ret = $this->model->save_one($data);
+      $this->result($ret?0:1);
+      if ($ret) {
+        $this->result(0);
+        $this->action_update_success($ret);
         return 0;
+      }
+      else {
+        $this->result(0);
       }
     }
     else {
@@ -196,7 +200,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   public function action_attachment($hid = NULL)
   {
     $hid = Arr::get($_GET, 'hid', $hid);
-    $attachment = $this->model->get_house_one($hid);
+    $attachment = $this->model->get_one($hid);
     if ($attachment) {
       $this->template->container->detail = View::factory('manager/house/house_attachment')
         ->set('hid', $hid)
@@ -208,15 +212,15 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   }
   public function action_display()
   {
-    $data = $this->model->update_display($this->hid);
-    $this->template->bind_global('message', $data);
+    $ret = $this->model->display_one($this->hid);
+    $this->result($ret);
     $this->action_index();
   }
 
   public function action_delete()
   {
-    $data = $this->model->delete($this->hid);
-    $this->template->bind_global('message', $data);
+    $ret = $this->model->delete_one($this->hid);
+    $this->result($ret);
     $this->action_index();
   }
 

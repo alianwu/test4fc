@@ -5,8 +5,7 @@ class Controller_Api_House extends Controller_Api {
   public function before()
   {
     parent::before();
-
-    $this->model_house = Model::factory('House_New');
+    $this->model = Model::factory('House_New');
   }
 
   public function action_list()
@@ -14,9 +13,9 @@ class Controller_Api_House extends Controller_Api {
     $page = (int) Arr::get($_GET, 'page', 0);
     $cid  = (int) Arr::get($_GET, 'cid', 0);
     if ($cid <> 0 && $page <> 0) {
-      $data = $this->model_house->get_house_front($cid);
+      $data = $this->model->get_house_front($cid);
       if ($data) {
-        $this->body['data'] = $data->as_array();
+        $this->result(0, $data->as_array());
       }
     }
   }
@@ -32,10 +31,9 @@ class Controller_Api_House extends Controller_Api {
         $city_id = $this->city_id;
       }
 
-      $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius);
+      $data = $this->model->get_near_front($city_id, $lat, $lng, $radius);
       if ($data) {
-        $this->body['error'] = 0;
-        $this->body['data'] = $data->as_array();
+        $this->result(0, $data->as_array());
       }
     }
   }

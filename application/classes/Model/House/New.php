@@ -6,10 +6,10 @@ class Model_House_New extends Model {
 
   function __construct()   
   {
-    $this->pagination = Kohana::$config->load('pagination.manager');
+    $this->pagination = Kohana::$config->load('pagination');
   }
 
-  public function get_house($city_id, $page = 0)
+  public function get_list($city_id, $page = 0)
   {
     $pagination = Kohana::$config->load('pagination.manager');
     $query = DB::query(Database::SELECT, 'SELECT count(*) FROM house WHERE city_id=:city_id')
@@ -20,21 +20,21 @@ class Model_House_New extends Model {
     $query = DB::query(Database::SELECT, 'SELECT * FROM house 
                 WHERE city_id=:city_id ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
-              ->param(':num', $this->pagination['items_per_page'])
-              ->param(':start', $this->pagination['items_per_page'] * ($page-1))
+              ->param(':num', $this->pagination->manager['items_per_page'])
+              ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))
               ->as_object()
               ->execute();
     $ret['data'] = $query;
     return $ret;
   } 
   
-  public function get_house_front($city_id, $page = 1)
+  public function get_list_front($city_id, $page = 1)
   {
     $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat FROM house 
                 WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
-              ->param(':num', $this->pagination['items_per_page'])
-              ->param(':start', $this->pagination['items_per_page'] * ($page-1))
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL : $query;
@@ -65,21 +65,21 @@ class Model_House_New extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_house_one($hid)
+  public function get_one($hid)
   {
     $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
-    return $query->count() == 0? FALSE : Arr::get($query->as_array(), 0);
+    return $query->count() == 0? NULL: $query->current();
   }
 
-  public function get_house_one_front($hid)
+  public function get_one_front($hid)
   {
     $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid AND display = TRUE LIMIT 1')
               ->param(':hid', $hid)
               ->as_object()
               ->execute();
-    return $query->count() == 0? FALSE : $query->current();
+    return $query->count() == 0? NULL : $query->current();
   }
 
   public function attachment_save($hid, $type, $attachment)
@@ -89,7 +89,7 @@ class Model_House_New extends Model {
               ->param(':hid', $hid)
               ->param(':attachment', urldecode($attachment))
               ->execute();
-    return $query == 0? FALSE : TRUE;
+    return $query? TRUE : FALSE;
   }
 
   public function attachment_delete($hid, $type, $attachment)
@@ -99,13 +99,12 @@ class Model_House_New extends Model {
               ->param(':hid', $hid)
               ->param(':attachment', urldecode($attachment))
               ->execute();
-    return $query == 0? FALSE : TRUE;
+    return $query? TRUE : FALSE;
   }
 
-  public function save($data)
+  public function save_one($data)
   {
-    $ret = array('error'=>TRUE, 'info'=>'', 'data' => '');
-
+    $rcode = 0;
     $data['geo'] = $data['lng'] . ',' . $data['lat']; 
     $data['display'] = (bool) $data['display']; 
     $data['phone'] = '{'. $data['phone'] .'}'; 
@@ -133,10 +132,9 @@ class Model_House_New extends Model {
                 ->as_object()
                 ->execute();
       if ($query) {
-        $ret['info'] = '执行成功';
-        $ret['error'] = FALSE;
-        $ret['data'] = $hid =  $query->get('hid');
+        $hid =  $query->get('hid');
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
+        $rcode = 1;
       }
     }
     else {
@@ -147,36 +145,27 @@ class Model_House_New extends Model {
                 ->parameters($parameters)
                 ->execute();
       if($query) {
-        $ret['error'] = FALSE;
-        $ret['data'] = $data['hid'];
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $data['hid'])->execute();
+        $rcode = 1;
      }
 
     }
-    return $ret;
+    return $rcode;
   }
 
-  public function update_display($hid)
+  public function display_one($hid)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
     $query = DB::query(Database::UPDATE, 'UPDATE house SET display= NOT display  WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query? TRUE:FALSE;
   }
 
-  public function delete($hid)
+  public function delete_one($hid)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
     $query = DB::query(Database::DELETE, 'DELETE FROM house  WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query? TRUE:FALSE;
   }
 }

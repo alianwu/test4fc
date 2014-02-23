@@ -50,13 +50,9 @@ class Controller_Manager_Article_Category extends Controller_Manager_Template {
       $post->rules($k, $v);
     }
     if( $post->check() ) {
-      $data = $post->as_array();
+      $data = $post->data();
       $ret = $this->model->save_one($data);
-      if ($ret) {
-        $this->message['error'] = 0;
-      }
-      else { }
-      $this->template->set_global('message', $this->message);
+      $this->result($ret);
     }
     else {
       $error = $post->errors('article/category');
@@ -83,10 +79,7 @@ class Controller_Manager_Article_Category extends Controller_Manager_Template {
   {
     $acid = (int) Arr::get($_GET, 'acid', 0);
     $ret = $this->model->delete_one($acid);
-    if ($ret) {
-      $this->message['error'] = 0; 
-    }
-    $this->template->bind_global('message', $this->message);
+    $this->result($ret);
     $this->action_index();
   }
 

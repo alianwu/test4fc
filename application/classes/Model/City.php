@@ -63,9 +63,9 @@ class Model_City extends Model {
     return $query->count() == 0? FALSE : Arr::get($query->as_array(), 0);
   }
   
-  public function save($data)
+  public function save_one($data)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
+    $rcode = 1;
     if (isset($data['cid']) && $data['cid'] == 0) {
       $name = explode("\n", $data['name']);
       $value = explode("\n", $data['value']);
@@ -85,8 +85,7 @@ class Model_City extends Model {
           ($test = $query->param(':name', $n)->param(':value', $v)->as_object()->execute() ) ? $index++ : NULL;
         }
       }
-      $ret['info'] = '执行成功：'. $index;
-      $ret['error'] = FALSE;
+      $rcode = 0;
     }
     else {
       $data['name'] = trim($data['name']);
@@ -100,34 +99,26 @@ class Model_City extends Model {
                 ->param(':weight', $data['weight'])
                 ->execute();
       if($query) {
-        $ret['error'] = FALSE;
+        $rcode = 0;
       }
 
     }
-    return $ret;
+    return $rcode;
   }
 
-  public function update_display($cid)
+  public function display_one($cid)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
     $query = DB::query(Database::UPDATE, 'UPDATE city SET display= NOT display  WHERE cid=:cid')
               ->param(':cid', $cid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query?TRUE:FALSE;
   }
 
-  public function delete($cid)
+  public function delete_one($cid)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
     $query = DB::query(Database::DELETE, 'DELETE FROM city  WHERE cid=:cid')
               ->param(':cid', $cid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query?TRUE:FALSE;
   }
 }

@@ -7,6 +7,7 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
     parent::before();
     $this->model = Model::factory('Article_Core');
     $this->model_category = Model::factory('Article_Core_Category');
+    $this->model_faq = Model::factory('Article_Core_Faq');
     if ($this->auto_render == TRUE) { 
       $this->template->container = View::factory('manager/article/article');
     }
@@ -15,10 +16,12 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
   public function action_index()
   {
     $page = Arr::get($_GET, 'page', 1);
-    $article = $this->model->get_list($page);
+    $article = $this->model->get_list(NULL, $page);
+    $category = $this->model_category->get_list_pretty();
 
     $view = View::factory('manager/article/article_index');
     $view->bind('article', $article);
+    $view->bind('category', $category);
 
     $this->template->container->detail = $view;
   }
@@ -33,7 +36,8 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
   
   public function action_editor()
   {
-    $data = $this->model->get_article_one($this->hid);
+    $aid = Arr::get($_GET, 'aid', 0);
+    $data = $this->model->get_one($aid);
     if($data === FALSE) {
       throw new Kohana_HTTP_Exception_404();
     }
@@ -45,7 +49,7 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
   public function action_update()
   {
     $fields = array(
-      'hid' => array(
+      'aid' => array(
             array('not_empty'),
             array('digit'),
           ),
@@ -53,96 +57,30 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
             array('digit'),
             array('not_empty'),
           ),
-      'name' => array(
+      'subject' => array(
+            array('trim'),
             array('not_empty'),
+            array('max_length', array(':value', 100)),
           ),
-      'status' => array(
-            array('max_length', array(':value', 30)),
+      'body' => array(
+            array('max_length', array(':value', 5000)),
+            array('not_empty'),
           ),
       'hot' => array(
             array('digit'),
           ),
-      'price' => array(
+      'category' => array(
             array('digit'),
-          ),
-      'price_history' => array(
-            array('max_length', array(':value', 100)),
-          ),
-      'article_date' => array(
-            array('date'),
-          ),
-      'article_date_sale' => array(
-            array('date'),
-          ),
-      'article_corp' => array(
-            array('max_length', array(':value', 30)),
-          ),
-      'article_speculator' => array(
-            array('max_length', array(':value', 30)),
-          ),
-      'article_service' => array(
-            array('max_length', array(':value', 30)),
-          ),
-      'article_service_price' => array(
-            array('numeric'),
-          ),
-      'acreage' => array(
-            array('digit'),
-          ),
-      'acreage_building' => array(
-            array('digit'),
-          ),
-      'copy' => array(
-            array('digit'),
-          ),
-      'car' => array(
-            array('digit'),
-          ),
-      'rate_1' => array(
-            array('numeric'),
-          ),
-      'rate_2' => array(
-            array('numeric'),
-          ),
-      'phone' => array(
-            array('max_length', array(':value', 300)),
-          ),
-      'school' => array(
-            array('max_length', array(':value', 30)),
-          ),
-      'school_near' => array(
-            array('max_length', array(':value', 30)),
-          ),
-      'city_area' => array(
-            array('digit'),
-          ),
-      'city_area_shop' => array(
-            array('digit'),
-          ),
-      'underground' => array(
-            array('digit'),
-          ),
-      'underground_platform' => array(
-            array('digit'),
-          ),
-      'building' => array(
-            array('digit'),
-          ),
-      'decorate' => array(
-            array('digit'),
-          ),
-      'address' => array(
             array('not_empty'),
-            array('max_length', array(':value', 30)),
           ),
-      'lat' => array(
-            array('numeric'),
+      'fromwhere' => array(
+            array('max_length', array(':value', 10)),
           ),
-      'lng' => array(
-            array('numeric'),
+      'tag' => array(
+            array('max_length', array(':value', 1000)),
           ),
-      'description' => array(
-            array('max_length', array(':value', 500)),
+      'relation' => array(
+            array('max_length', array(':value', 1000)),
           ),
       'weight' => array(
             array('digit'),
@@ -161,41 +99,43 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
       $post->rules($k, $v);
     }
     if( $post->check() ) {
-      $data = $post->as_array();
-      $ret = $this->model->save($data);
-      $this->template->set_global('message', $ret);
-      if ($ret['error'] == FALSE) {
-        $this->action_update_success($ret['data']);
-        return 0;
-      }
+      $data = $post->data();
+      $ret = $this->model->save_one($data);
+      $this->result($ret?0:1);
     }
     else {
-      $error = $post->errors('city/add');
+      $error = $post->errors('article');
+      // print_r($error);
+      $this->result(1);
       $this->template->bind_global('error', $error);
     }
-    
     $this->action_add();
-  }
-  
-
-  public function action_update_success($hid = NULL)
-  {
-    $this->template->container->detail = View::factory('manager/article/article_add_success')
-                                              ->set('hid', $hid);
   }
 
   public function action_display()
   {
-    $data = $this->model->update_display($this->hid);
-    $this->template->bind_global('message', $data);
+    $aid = Arr::get($_GET, 'aid', 0);
+    $ret = $this->model->display_one($aid);
+    $this->result($ret);
     $this->action_index();
   }
 
   public function action_delete()
   {
-    $data = $this->model->delete($this->hid);
-    $this->template->bind_global('message', $data);
+    $aid = Arr::get($_GET, 'aid', 0);
+    $ret = $this->model->delete_one($aid);
+    $this->result($ret);
     $this->action_index();
+  }
+
+  public function action_faq()
+  {
+    $aid = Arr::get($_GET, 'aid', 0);
+    $page = Arr::get($_GET, 'page', 1);
+    $faq = $this->model_faq->get_list($aid, $page);
+    $view = View::factory('manager/article/article_faq');
+    $view->bind_global('faq', $faq);
+    $this->template->container->detail = $view;
   }
 
 } 

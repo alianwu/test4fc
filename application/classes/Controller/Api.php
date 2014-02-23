@@ -1,10 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-abstract class Controller_Api extends Controller_Template {
+class Controller_Api extends Controller_Template {
 
   public $auto_render = FALSE; 
-
-  protected $body = array('error'=>1, 'data'=>NULL);
 
   public function before()
   {
@@ -13,13 +11,20 @@ abstract class Controller_Api extends Controller_Template {
 
   public function action_error()
   {
-    $this->body['data'] = 'requre user login';
+    $code = (int) $this->request->param('id');
+    $this->result($code==0?1:$code);
+
   }
 
+  public function error_user($error = NULL)
+  {
+    $this->result(1, $error == NULL ? 'please login': $error);
+  }
+  
   public function after()
   {
     parent::after();
-    $this->response->body(json_encode($this->body))->headers('Content-Type', 'application/json');
+    $this->response->body(json_encode($this->result))->headers('Content-Type', 'application/json');
   }
 
 } // End API

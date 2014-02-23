@@ -44,15 +44,15 @@ class Controller_Manager_User extends Controller_Manager_Template {
         ->rules('display', array());
 
     if( $post->check() ) {
-      $data = $post->as_array();
+      $data = $post->data();
       $data['id'] = $this->user['id'];
-      $ret = $this->model->update($data);
-      $this->template->set_global('message', $ret);
+      $ret = $this->model->update_one($data);
+      $this->result($ret);
     }
     else {
       $error = $post->errors('user');
       $this->template->bind_global('error', $error);
-      $this->template->set_global('message', array('error'=>TRUE));
+      $this->result(5);
     }
     
     $this->action_index();

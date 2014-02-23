@@ -47,11 +47,11 @@ class Model_House_Faq extends Model {
               ->param(':fid', $fid)
               ->as_object()
               ->execute();
-    return $query->count() == 0 ? array() : $query->current();
+    return $query->count() == 0 ? NULL: $query->current();
 
   }
 
-  public function save($data)
+  public function save_one($data)
   {
     $query = DB::query(Database::INSERT, 'INSERT INTO house_faq(hid, question, mid, username)
                 VALUES (:hid, :question, :mid, :username) ')
@@ -61,19 +61,15 @@ class Model_House_Faq extends Model {
               ->param(':mid', $data['_id'])
               ->param(':username', $data['_name'])
               ->execute();
-    return $query;
+    return $query?TRUE:FALSE;
   }
 
-  public function display($fid)
+  public function display_one($fid)
   {
-    $ret = array('error'=>TRUE, 'info'=>'');
     $query = DB::query(Database::UPDATE, 'UPDATE house_faq SET display= NOT display  WHERE fid=:fid')
               ->param(':fid', $fid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query?TRUE:FALSE;
   }
 
   public function delete($fid)
@@ -82,9 +78,6 @@ class Model_House_Faq extends Model {
     $query = DB::query(Database::DELETE, 'DELETE FROM house_faq  WHERE fid=:fid')
               ->param(':fid', $fid)
               ->execute();
-    if ($query) {
-      $ret['error'] = FALSE;
-    }
-    return $ret;
+    return $query?TRUE:FALSE;
   }
 }

@@ -39,28 +39,32 @@ class Controller_Manager_House_Faq extends Controller_Manager_Template {
   public function action_display()
   {
     $fid = (int) Arr::get($_GET, 'fid', 1);
-    $data = $this->model->display($fid);
+    $ret = $this->model->display_one($fid);
+    $this->result($ret);
     $this->action_index();
   }
 
   public function action_delete()
   {
     $fid = (int) Arr::get($_GET, 'fid', 1);
-    $data = $this->model->delete($fid);
+    $ret = $this->model->delete_one($fid);
+    $this->result($ret);
     $this->action_index();
   }
 
   public function action_display_detail()
   {
     $fid = (int) Arr::get($_GET, 'fid', 1);
-    $data = $this->model_detail->display($fid);
+    $ret = $this->model_detail->display_one($fid);
+    $this->result($ret);
     $this->action_detail();
   }
 
   public function action_delete_detail()
   {
     $fid = (int) Arr::get($_GET, 'fid', 1);
-    $data = $this->model_detail->delete($fid);
+    $ret = $this->model_detail->delete_one($fid);
+    $this->result($ret);
     $this->action_detail();
   }
 

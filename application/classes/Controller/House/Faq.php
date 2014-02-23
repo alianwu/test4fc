@@ -15,8 +15,8 @@ class Controller_House_Faq extends Controller_Template {
   public function action_index()
   {
     $hid = $this->request->param('id');
-    $house = $this->model_house->get_house_one_front($hid, 1);
-    if ($house == FALSE) {
+    $house = $this->model_house->get_one_front($hid, 1);
+    if ($house == NULL) {
       throw new Kohana_HTTP_Exception_404();
     }
     $faq = $this->model->get_list_front($hid, 1);
@@ -31,7 +31,7 @@ class Controller_House_Faq extends Controller_Template {
     $faqid = $this->request->param('id');
     $faq = $this->model->get_one_front($faqid);
     $faqd = $this->model_detail->get_list_front($faqid, 1);
-    if ($faq == FALSE) {
+    if ($faq == NULL) {
       throw new Kohana_HTTP_Exception_404();
     }
     $view =  View::factory('house/faq_detail');
