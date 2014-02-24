@@ -53,13 +53,12 @@ class Map_Baidu extends Map {
     }
 
     $query = URL::query(  $query + $this->query );
-
-    ini_set('default_socket_timeout', 2);
-
-    $data = file_get_contents($this->geocoder_url . $query);
-    $data = json_decode($data);
-    if ($data && isset($data->status) && $data->status == 0) {
-      return $data;
+    $response = Request::factory($this->geocoder_url . $query)->execute();
+    if ($response) {
+      $data = json_decode($response->body());
+      if ($data && isset($data->status) && $data->status == 0) {
+        return $data;
+      }
     }
     return NULL;
 

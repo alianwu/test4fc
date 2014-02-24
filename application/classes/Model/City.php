@@ -20,6 +20,38 @@ class Model_City extends Model {
     return $query->as_array('cid', $key);
   }
 
+  public function get_city_group($city_id)
+  {
+    $ret = array('group'=>NULL, 'underground'=>'');
+    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:cid and type=1')
+              ->param(':display', TRUE)
+              ->param(':cid', $city_id)
+              ->as_object()
+              ->execute();
+    $group = array();
+    if ($query->count()) {
+      foreach($query as $v) {
+        $query_2 = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:cid and type=6')
+              ->param(':display', TRUE)
+              ->param(':cid', $v->cid)
+              ->execute();
+        $group[$v->cid] = $query_2->as_array('cid', 'name');
+      }
+    }
+    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:cid and type=2')
+              ->param(':display', TRUE)
+              ->param(':cid', $city_id)
+              ->execute();
+    $underground = $query->as_array('cid', 'name');
+
+    $ret['group'] = $group;
+    $ret['underground'] = $underground;
+    return $ret;
+
+
+
+  }
+
   public function get_city_from_value($value)
   {
     $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city 

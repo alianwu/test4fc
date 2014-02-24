@@ -22,19 +22,25 @@ class Controller_Api_House extends Controller_Api {
 
   public function action_near()
   {
-    $zoom = (int) Arr::get($_GET, 'zoom', 9);
+    $page = (int) Arr::get($_GET, 'page', 1);
+    $page = max($page, 1);
     $lat  = (int) Arr::get($_GET, 'lat', 0);
+    if ($lat == 0) {
+      $lat = $this->city_lat;
+    }
     $lng  = (int) Arr::get($_GET, 'lng', 0);
-    $radius  = (int) Arr::get($_GET, 'radius', 1500);
-    if ($zoom && $lat && $lng) { 
-      if ( ($city_id = (int) Arr::get($_GET, 'city_id', 0)) == 0 ) {
-        $city_id = $this->city_id;
-      }
+    if ($lng == 0) {
+      $lng = $this->city_lng;
+    }
+    $city_id = (int) Arr::get($_GET, 'city_id', 0);
+    if ($city_id == 0) {
+      $city_id = $this->city_id;
+    }
+    $radius  = (int) Arr::get($_GET, 'radius', 1500000000);
 
-      $data = $this->model->get_near_front($city_id, $lat, $lng, $radius);
-      if ($data) {
-        $this->result(0, $data->as_array());
-      }
+    $data = $this->model->get_near_front($city_id, $lat, $lng, $radius, $page);
+    if ($data) {
+      $this->result(0, $data->as_array());
     }
   }
 

@@ -30,7 +30,7 @@ class Model_House_New extends Model {
   
   public function get_list_front($city_id, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[0] AS image  FROM house 
                 WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -48,19 +48,20 @@ class Model_House_New extends Model {
     return $ret;
   }
 
-  public function get_near_front($cid, $lat, $lng, $radius)
+  public function get_near_front($cid, $lat, $lng, $radius, $page=1)
   {
     $ret = array('total' => 0, 'data' => NULL);
     $point = 'POINT('.$lng.' '.$lat.')';
-    $sql = "SELECT t.*, t.geo[0] AS lng, t.geo[1] As lat FROM house As t
+    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.geo[0] AS lng, t.geo[1] As lat FROM house As t
                 WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
                   ST_Transform(t.geo2, 26986), "
                   .$radius.") 
-                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo2) LIMIT :num";
+                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo2) LIMIT :num OFFSET :start";
     $query = DB::query(Database::SELECT, $sql)
               ->param(':city_id', $cid)
-              ->param(':num', 30)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->execute();
     return $query->count() == 0 ? NULL : $query;
   }
@@ -102,6 +103,7 @@ class Model_House_New extends Model {
     return $query? TRUE : FALSE;
   }
 
+  // return house id
   public function save_one($data)
   {
     $rcode = 0;
@@ -134,7 +136,7 @@ class Model_House_New extends Model {
       if ($query) {
         $hid =  $query->get('hid');
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
-        $rcode = 1;
+        $rcode = $hid;
       }
     }
     else {
@@ -146,7 +148,7 @@ class Model_House_New extends Model {
                 ->execute();
       if($query) {
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $data['hid'])->execute();
-        $rcode = 1;
+        $rcode = $data['hid'];
      }
 
     }

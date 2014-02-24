@@ -117,7 +117,12 @@ abstract class Controller_Template extends Controller {
         return TRUE;
       }
     }
-    else { }
+    elseif(FALSE) { 
+      // from baidu map
+    }
+    else {
+
+    }
 
     $cache_name = 'geo_city_id_'.$this->city_id;
     $geo = Cache::instance()->get($cache_name, FALSE);
