@@ -43,14 +43,20 @@ class Model_House_Faq_Detail extends Model {
 
   public function save_one($data)
   {
-    $query = DB::query(Database::INSERT, 'INSERT INTO house_faq_detail_detail(fid, body, mid, username)
+    $query = DB::query(Database::INSERT, 'INSERT INTO house_faq_detail(fid, body, mid, username)
                 VALUES (:fid, :body, :mid, :username) ')
               ->param(':fid', $data['fid'])
               ->param(':body', $data['body'])
               ->param(':mid', $data['_id'])
               ->param(':username', $data['_name'])
               ->execute();
-    return $query?TRUE:FALSE;
+    $b = $query?TRUE:FALSE;
+    if ($b) {
+      DB::query(Database::UPDATE, 'UPDATE house_faq SET count=count+1 WHERE fid=:fid')
+              ->param(':fid', $data['fid'])
+              ->execute();
+    }
+    return $b;
   }
 
   public function display_one($fid)

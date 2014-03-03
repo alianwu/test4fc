@@ -52,3 +52,6 @@
 [submodule "modules/purifier"]
 	path = modules/purifier
 	url = git@github.com:perhome/kohana-purifier.git
+[submodule "modules/map"]
+	path = modules/map
+	url = git@github.com:perhome/kohana-map.git

@@ -37,12 +37,12 @@ class Controller_Api_Faq extends Controller_Api {
   public function action_save()
   {
     if ($this->user == NULL) {
-      $this->redirect('api/error');
+      return $this->error_user();
     }
 
     $post = Validation::factory( Arr::extract($_POST, 
                                               array('body', 'hid')) );
-    $post->rules('question', array(
+    $post->rules('body', array(
             array('trim'),
             array('not_empty'),
             array('min_length', array(':value', 5)),

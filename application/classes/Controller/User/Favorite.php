@@ -2,7 +2,7 @@
 
 class Controller_User_Favorite extends Controller_Template {
   
-  public $template = 'template-home';
+  public $template = 'template';
 
   protected $model_house;
 

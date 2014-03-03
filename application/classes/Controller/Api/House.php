@@ -20,6 +20,15 @@ class Controller_Api_House extends Controller_Api {
     }
   }
 
+  public function action_search()
+  {
+    $data = Arr::extract($_GET, array('keyword', 'area', 'price', 'group', 'underground', 'page'));
+    $data = $this->model->get_search_front($this->city_id, $data);
+    if ($data) {
+        $this->result(0, $data->as_array());
+    }
+  }
+
   public function action_near()
   {
     $page = (int) Arr::get($_GET, 'page', 1);
@@ -39,8 +48,9 @@ class Controller_Api_House extends Controller_Api {
     $radius  = (int) Arr::get($_GET, 'radius', 1500000000);
 
     $data = $this->model->get_near_front($city_id, $lat, $lng, $radius, $page);
+    $this->result(0);
     if ($data) {
-      $this->result(0, $data->as_array());
+      $this->result(NULL, $data->as_array());
     }
   }
 

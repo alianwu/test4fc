@@ -31,7 +31,19 @@ class Model_House_Faq extends Model {
   public function get_list_front($hid, $page = 1)
   {
     $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
-                WHERE hid=:hid AND display=true ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
+                WHERE hid=:hid AND display=true ORDER BY created DESC, fid DESC LIMIT :num OFFSET :start ')
+              ->param(':hid', $hid)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  } 
+
+  public function get_list_hot_front($hid, $page = 1)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
+                WHERE hid=:hid AND display=true ORDER BY count DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param(':hid', $hid)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
@@ -51,13 +63,24 @@ class Model_House_Faq extends Model {
 
   }
 
+  public function get_list_favorite(array $ids, $page=1)
+  {
+    $fid = implode(',', $ids);
+    $query = DB::query(Database::SELECT, 'SELECT *  FROM house_faq
+                WHERE fid in ('.$fid.') AND display=TRUE')
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+
   public function save_one($data)
   {
-    $query = DB::query(Database::INSERT, 'INSERT INTO house_faq(hid, question, mid, username)
-                VALUES (:hid, :question, :mid, :username) ')
+    $query = DB::query(Database::INSERT, 'INSERT INTO house_faq(hid, body, mid, username)
+                VALUES (:hid, :body, :mid, :username) ')
               ->param(':hid', $data['hid'])
               ->param(':city_id', $data['city_id'])
-              ->param(':question', $data['question'])
+              ->param(':body', $data['body'])
               ->param(':mid', $data['_id'])
               ->param(':username', $data['_name'])
               ->execute();

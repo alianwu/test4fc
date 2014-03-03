@@ -5,22 +5,34 @@ class Controller_Api_Favorite extends Controller_Api {
   public function before()
   {
     parent::before();
-    if ($this->user == NULL)
-    {
-      $this->redirect('api/error');
-    }
-    $this->model = Model::factory('Favorite');
+    // $this->model = Model::factory('Favorite');
   }
 
   public function action_list()
   {
-    $page = (int) Arr::get($_GET, 'page', 1);
-    $type = (int) Arr::get($_GET, 'type', 0);
-    if ($page && $type) {
-      $data = $this->model->get_list_front($this->user['id'], $type, $page);
-      if ($data) {
-        $this->result(1, $data->as_array());
-      }
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $type = Arr::get($_GET, 'type', '');
+    $value = Arr::get($_GET, 'value', '');
+    $ids = explode('|', $value);
+    if (empty($ids)) {
+      return false;
+    }
+    $ids = array_map(function($v){ return (int)$v; }, $ids);
+    switch($type) {
+      case 'house_new':
+        $data = Model::factory('House_New')->get_list_favorite($ids, $page) ;
+        break;
+      case 'faq':
+        $data = Model::factory('House_Faq')->get_list_favorite($ids, $page) ;
+        break;
+      case 'article':
+        $data = Model::factory('Article')->get_list_favorite($ids, $page) ;
+        break;
+      default:
+        return false;
+    }
+    if ($data) {
+      $this->result(0, $data->as_array());
     }
   }
 

@@ -25,6 +25,7 @@ abstract class Controller_Template extends Controller {
   public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
+  public $city_radius = 50000000000000;
   public $pagination = NULL;
   public $token = '';
   public $result = array('status'=>1, 'data'=>NULL);
@@ -46,7 +47,6 @@ abstract class Controller_Template extends Controller {
     if ($http_x_pjax) {
       $this->auto_render = FALSE;
     }
-
     $this->model_city = Model::factory('City');
     $this->city_pretty = $this->model_city->get_city_pretty();
 
@@ -93,7 +93,7 @@ abstract class Controller_Template extends Controller {
     $city_id = (int) Cookie::get('city_id');
     if ($id !== NULL) { 
       $this->city_id = $id;
-      if($id == $city_id) {
+      if($this->city_id == $city_id) {
         return FALSE;
       }
     }

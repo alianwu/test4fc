@@ -11,6 +11,12 @@ class Controller_Api_City extends Controller_Api {
       $this->result(0, $data);
     }
   }
+  
+  public function action_get_address()
+  {
+    $address = Cookie::get('city_address', $this->city_pretty[$this->city_id]);
+    $this->result(0, $address)
+  }
 
   public function action_set_city()
   {
@@ -26,9 +32,9 @@ class Controller_Api_City extends Controller_Api {
     }
 
     if ($id && ($city_id = $this->check_exist_city($id)))  {
-      $this->result(0, $city_id);
       $this->city_id = $city_id;
       $ret = $this->initialize_city($this->city_id);
+      $this->result(0, $this->city_id);
       if ($ret == FALSE) {
         $this->result(0, 0);
       }
@@ -48,10 +54,11 @@ class Controller_Api_City extends Controller_Api {
       if ($_city) {
         return $_city;
       }
-
+  
       $geo = Map::instance()->geocoder($city);
       if($geo->status == 0 && isset($geo->result->addressComponent->city)) {
         $city = $geo->result->addressComponent->city;
+        Cookie::set('city_address', $geo->result->formatted_address);
       } 
       $_city = $this->check_exist_city_name($city);
       if ($_city) {
@@ -70,7 +77,7 @@ class Controller_Api_City extends Controller_Api {
     if (in_array($name, $this->city_pretty)) {
       return $pretty[$name];
     }
-    $name = mb_substr($name, 0, -1);
+    $name = UTF8::substr($name, 0, -1);
     if (in_array($name, $this->city_pretty)) {
       return $pretty[$name];
     }

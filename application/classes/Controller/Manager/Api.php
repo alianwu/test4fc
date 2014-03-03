@@ -47,7 +47,7 @@ class Controller_Manager_Api extends Controller_Api {
           $attachment  = $dir.$name;
           $body['data'] = $attachment;
           $ret = $this->model_house->attachment_save($hid, $atype, $attachment);
-          return $this->result($ret);
+          return $this->result($ret, $attachment);
         }
         else {
           $this->result(1, '异常问题');

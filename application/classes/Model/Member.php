@@ -15,6 +15,7 @@ class Model_Member extends Model_Accounts_Core {
                   ->as_object()
                   ->execute();
     if($query->count() == 0) {
+      $data['screenName'] = htmlspecialchars($data['screenName']);
       $query = DB::query(Database::SELECT, 'INSERT INTO member(name, mediaid, mediauserid, created) 
                     VALUES (:name, :mediaid, :mediauserid, :created) RETURNING mid')
                   ->param(':name', $data['screenName'])
@@ -33,7 +34,7 @@ class Model_Member extends Model_Accounts_Core {
       $mname = $query->get('name');
     }
 
-    Session::instance()->set($this->session_name, array('id'=>$mid, 'name'=>$mname));
+    Session::instance()->set($this->session_name, array('_id'=>$mid, '_name'=>$mname));
     return TRUE;
   }
 

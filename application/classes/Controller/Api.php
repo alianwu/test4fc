@@ -12,7 +12,7 @@ class Controller_Api extends Controller_Template {
   public function action_error()
   {
     $code = (int) $this->request->param('id');
-    $this->result($code==0?1:$code);
+    $this->result($code == 0?1:$code);
 
   }
 

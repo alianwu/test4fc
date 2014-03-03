@@ -2,7 +2,7 @@
 
 class Controller_House_Faq extends Controller_Template {
   
-  public $template = 'template-house';
+  public $template = 'template';
 
   public function before()
   {
@@ -12,18 +12,44 @@ class Controller_House_Faq extends Controller_Template {
     $this->model_detail = Model::factory('House_Faq_Detail');
   }
 
-  public function action_index()
+  private function _action_list($type='hot')
   {
     $hid = $this->request->param('id');
     $house = $this->model_house->get_one_front($hid, 1);
     if ($house == NULL) {
       throw new Kohana_HTTP_Exception_404();
     }
-    $faq = $this->model->get_list_front($hid, 1);
-    $view =  View::factory('house/faq_index');
-    $view->bind_global('house', $house);
-    $view->bind_global('faq', $faq);
-    $this->template->container = $view;
+    switch ($type) {
+      case 'hot':
+        $faq = $this->model->get_list_hot_front($hid, 1);
+        break;
+      case 'latest':
+        $faq = $this->model->get_list_front($hid, 1);
+        break;
+      default:
+    }
+
+    $view_list =  View::factory('house/faq_list');
+    $view_list->bind_global('faq', $faq);
+    $view_list->bind_global('house', $house);
+    
+    if ($this->auto_render == TRUE) {
+      $view =  View::factory('house/faq');
+      $view->container = $view_list;
+      $this->template->container = $view;
+    }
+    else {
+      $this->response->body($view_list); 
+    }
+  }
+
+  public function action_index()
+  {
+    $this->_action_list('hot');
+  }
+  public function action_latest()
+  {
+    $this->_action_list('latest');
   }
 
   public function action_detail()

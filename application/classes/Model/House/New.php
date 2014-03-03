@@ -30,7 +30,7 @@ class Model_House_New extends Model {
   
   public function get_list_front($city_id, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[0] AS image  FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[0] AS image FROM house 
                 WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -38,21 +38,69 @@ class Model_House_New extends Model {
               ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL : $query;
-
+  }
+  
+  public function get_hot_front($city_id, $page)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+                WHERE city_id=:city_id AND hot=1 AND display=TRUE ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
+              ->param(':city_id', $city_id)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_search_front($data, $page)
+  public function get_search_front($city_id, $data)
   {
-    $ret = array('total' => 0, 'data' => NULL);
+    $page = max((int)$data['page'], 1);
+    $parameters = array(':city_id'=>$city_id);
+    $where = 'city_id=:city_id';
+    $name = trim($data['keyword']);
+    if ($name) {
+        $where .= ' AND (name like :keyword AND address like :keyword)';
+        $parameters[':keyword'] = '%'.$name.'%';
+    }
+    $area = (int) $data['area']; 
+    if ($area) {
+      $where .= ' AND city_area=:city_area';
+      $parameters[':city_area'] = $area;
+    }
+    $price = explode('-', $data['price']);
+    if ($price) {
+      $min_price = isset($price[0])? (int) $price[0]:0;
+      if ($min_price) {
+        $where .= ' AND price >:min_price';
+        $parameters[':min_price'] = $min_price;
+      }
+      $max_price = isset($price[1])? (int) $price[1]:0;
 
-    return $ret;
+      if ( $max_price && $max_price > $min_price) {
+        $where .= ' AND price < :max_price';
+        $parameters[':max_price'] = $max_price;
+      }
+    }
+    $underground = (int) $data['underground'];
+    if ($underground) {
+      $where .= ' AND underground=:underground';
+      $parameters[':underground'] = $underground;
+    }
+
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+                WHERE '.$where.' AND display=TRUE ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
+              ->parameters($parameters)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
   }
 
   public function get_near_front($cid, $lat, $lng, $radius, $page=1)
   {
-    $ret = array('total' => 0, 'data' => NULL);
     $point = 'POINT('.$lng.' '.$lat.')';
-    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.geo[0] AS lng, t.geo[1] As lat FROM house As t
+    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.geo[0] AS lng, t.geo[1] AS lat FROM house AS t
                 WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
                   ST_Transform(t.geo2, 26986), "
@@ -62,6 +110,17 @@ class Model_House_New extends Model {
               ->param(':city_id', $cid)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+  
+  public function get_list_favorite(array $ids, $page=1)
+  {
+    $hid = implode(',', $ids);
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+                WHERE hid in ('.$hid.') AND display=TRUE')
+              ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL : $query;
   }
@@ -99,6 +158,14 @@ class Model_House_New extends Model {
     $query = DB::query(Database::UPDATE, 'UPDATE house SET '.$field.'=array_remove('.$field.',:attachment) WHERE hid=:hid')
               ->param(':hid', $hid)
               ->param(':attachment', urldecode($attachment))
+              ->execute();
+    return $query? TRUE : FALSE;
+  }
+
+  public function update_hit($hid)
+  {
+    $query = DB::query(Database::UPDATE, 'UPDATE house SET hit=hit+1 WHERE hid=:hid')
+              ->param(':hid', $hid)
               ->execute();
     return $query? TRUE : FALSE;
   }

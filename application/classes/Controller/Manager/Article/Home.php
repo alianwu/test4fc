@@ -73,7 +73,7 @@ class Controller_Manager_Article_Home extends Controller_Manager_Template {
             array('digit'),
             array('not_empty'),
           ),
-      'fromwhere' => array(
+      'source' => array(
             array('max_length', array(':value', 10)),
           ),
       'tag' => array(
