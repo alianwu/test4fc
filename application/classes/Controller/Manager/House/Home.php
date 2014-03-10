@@ -33,22 +33,35 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     $this->template->container->detail = $view;
   }
 
-  public function action_add()
+  public function action_add($editor=false)
   { 
+    $tmpid = Text::random();
+    if ($editor == false) {
+      Cookie::set('manager_house_add_tmpid', 'tmpid-'.$tmpid);
+      $attachment = (array) Session::instance()->get('manager.house.add.attachment');
+      print_r($_SESSION);
+      print_r($_COOKIE);
+    }
+    else {
+      $attachment = $_POST;
+    }
     $underground = $this->model_city->get_city_pretty($this->city_id, 2);
     $this->template->container->detail = View::factory('manager/house/house_add')
-                                              ->set('underground', $underground);
+                                              ->set('underground', $underground)
+                                              ->set('attachment', $attachment)
+                                              ->set('tmpid', $tmpid);
   }
   
   public function action_editor()
   {
+    Cookie::delete('manager.house.add.tmpid');
     $data = $this->model->get_one($this->hid);
     if($data === FALSE) {
       throw new Kohana_HTTP_Exception_404();
     }
 
     $_POST = $data;
-    $this->action_add();
+    $this->action_add(true);
   }
 
   public function action_update()
@@ -119,6 +132,9 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
       'school' => array(
             array('max_length', array(':value', 30)),
           ),
+      'school_building' => array(
+            array('max_length', array(':value', 100)),
+          ),
       'school_near' => array(
             array('max_length', array(':value', 30)),
           ),
@@ -151,7 +167,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
             array('numeric'),
           ),
       'description' => array(
-            array('max_length', array(':value', 500)),
+            array('min_length', array(':value', 1)),
           ),
       'weight' => array(
             array('digit'),
@@ -162,7 +178,6 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
           ),
       'csrf' => array(
             array('not_empty'),
-            array('Security::check'),
           ),
     );
     $post = Validation::factory( Arr::extract($_POST,  array_keys($fields)) );

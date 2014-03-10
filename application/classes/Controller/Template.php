@@ -25,7 +25,7 @@ abstract class Controller_Template extends Controller {
   public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
-  public $city_radius = 50000000000000;
+  public $city_radius = 200000;
   public $pagination = NULL;
   public $token = '';
   public $result = array('status'=>1, 'data'=>NULL);
@@ -58,6 +58,7 @@ abstract class Controller_Template extends Controller {
     $this->city_cache = $this->model_city->get_city_cache();
     $this->core = Kohana::$config->load('core');
     $this->setting = Kohana::$config->load('setting');
+    $this->map = Kohana::$config->load('map.baidu');
     $this->token = Security::token();
 
     $this->pagination = Kohana::$config->load('pagination.default');
@@ -70,6 +71,7 @@ abstract class Controller_Template extends Controller {
       $this->template->bind_global('map', $map);
       $this->template->bind_global('core', $this->core);
       $this->template->bind_global('setting', $this->setting);
+      $this->template->bind_global('map', $this->map);
       $this->template->bind_global('user', $this->user);
       $this->template->bind_global('city_pretty', $this->city_pretty);
       $this->template->bind_global('city_cache', $this->city_cache);
@@ -88,28 +90,22 @@ abstract class Controller_Template extends Controller {
     return $user;
   }
 
-  public function initialize_city($id = NULL)
+  public function initialize_city($id = NULL, $geo = NULL)
   {
     $city_id = (int) Cookie::get('city_id');
     if ($id !== NULL) { 
       $this->city_id = $id;
-      if($this->city_id == $city_id) {
-        return FALSE;
+      if (isset($geo['lat'])) {
+        $geo['city_id'] =$this->city_id;
       }
+      Session::instance()->set('geo', $geo);
     }
     elseif  ($city_id <> 0 
         && isset($this->city_pretty[$city_id])) {
       $this->city_id = $city_id;
-      $city_lat = Cookie::get('city_lat');
-      $city_lng = Cookie::get('city_lng');
-      if (is_numeric($city_lat) && is_numeric($city_lng)) {
-        $this->city_lng = $city_lng;
-        $this->city_lat = $city_lat;
-        return FALSE;
-      }
     }
     elseif ( $v = Arr::get($_SERVER, 'GEOIP_CITY') ) {
-      $ret = $this->model_city->get_city_from_value($v);
+      $ret = $this->model_city->get_city_from_value(strtolower($v));
       if ($ret) {
         $this->city_id = $ret->get('cid');
         $this->city_lng = Arr::get($_SERVER, 'GEOIP_LONGITUDE');
@@ -124,25 +120,29 @@ abstract class Controller_Template extends Controller {
 
     }
 
-    $cache_name = 'geo_city_id_'.$this->city_id;
-    $geo = Cache::instance()->get($cache_name, FALSE);
-    if ($geo) {
+    $geo = Session::instance()->get('geo', FALSE);
+    if ($geo && isset($geo['city_id']) && $this->city_id == $geo['city_id']) {
+        $this->city_lng = $geo['lng'];
+        $this->city_lat = $geo['lat'];
+    }
+    elseif ($geo = Cache::instance()->get($cache_name = 'geo_city_id_'.$this->city_id, FALSE) ) {
       $this->city_lng = $geo['lng'];
       $this->city_lat = $geo['lat'];
     }
-    else {
-      $geo = Map::instance()->geocoder($this->city_pretty[$this->city_id], TRUE);
+    elseif ($geo = Map::instance()->geocoder($this->city_pretty[$this->city_id], TRUE)) {
       if($geo && isset($geo->result->location->lng) && $geo->result->location->lng <> '')
       {
         $this->city_lng = $geo->result->location->lng;
         $this->city_lat = $geo->result->location->lat;
-        Cache::instance()->set($cache_name, array('lng'=>$this->city_lng, 'lat'=>$this->city_lat));
       } 
+      else {
+        $this->city_lng = Arr::get($_SERVER, 'GEOIP_LONGITUDE');
+        $this->city_lat = Arr::get($_SERVER, 'GEOIP_LATITUDE');
+      }
+      Cache::instance()->set($cache_name, array('lng'=>$this->city_lng, 'lat'=>$this->city_lat));
     }
 
     Cookie::set('city_id', $this->city_id);
-    Cookie::set('city_lat', $this->city_lat);
-    Cookie::set('city_lng', $this->city_lng);
     return TRUE;
   }
 

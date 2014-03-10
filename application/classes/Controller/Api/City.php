@@ -12,20 +12,17 @@ class Controller_Api_City extends Controller_Api {
     }
   }
   
-  public function action_get_address()
-  {
-    $address = Cookie::get('city_address', $this->city_pretty[$this->city_id]);
-    $this->result(0, $address)
-  }
-
   public function action_set_city()
   {
+    $extra = array();
     $id = '';
     if(isset($_GET['name'])) {
       $id = Arr::get($_GET, 'name', '');
     }
-    elseif(isset($_GET['location'])) {
-      $id = Arr::get($_GET, 'location', '');
+    elseif( ($lat = Arr::get($_GET, 'lat', '') ) &&  ($lng = Arr::get($_GET, 'lng', '') )) {
+      $extra['lat'] = $lat;
+      $extra['lng'] = $lng;
+      $id = $lat.','.$lng;
     }
     else {
       $id = $this->request->param('id');
@@ -33,14 +30,21 @@ class Controller_Api_City extends Controller_Api {
 
     if ($id && ($city_id = $this->check_exist_city($id)))  {
       $this->city_id = $city_id;
-      $ret = $this->initialize_city($this->city_id);
+      $ret = $this->initialize_city($this->city_id, $extra);
       $this->result(0, $this->city_id);
-      if ($ret == FALSE) {
-        $this->result(0, 0);
-      }
     }
   }
- 
+
+  public function action_update_city()
+  {
+    $lat = Arr::get($_GET, 'lat', 0);
+    $lng = Arr::get($_GET, 'lng', 0);
+    if (is_numeric($lat) && is_numeric($lng) && $lat & $lng) {
+      $this->initialize_city($this->city_id, array('lat'=>$lat, 'lng'=>$lng));
+      $this->result(0);
+    }
+  }
+
   protected function check_exist_city($city)
   {
     if(is_numeric($city)) {
@@ -58,7 +62,6 @@ class Controller_Api_City extends Controller_Api {
       $geo = Map::instance()->geocoder($city);
       if($geo->status == 0 && isset($geo->result->addressComponent->city)) {
         $city = $geo->result->addressComponent->city;
-        Cookie::set('city_address', $geo->result->formatted_address);
       } 
       $_city = $this->check_exist_city_name($city);
       if ($_city) {

@@ -30,4 +30,8 @@ return array(
       3  => '样板',
       4  => '规划',
     ),
+  'hotsearch' => array(
+    'sh_house' => '新房高级',
+    'sh_article' => '资讯高级',
+  )
 );

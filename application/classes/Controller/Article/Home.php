@@ -1,4 +1,3 @@
-
 <?php defined('SYSPATH') or die('No direct script access.');
 
 class Controller_Article_Home extends Controller_Template {
@@ -40,8 +39,8 @@ class Controller_Article_Home extends Controller_Template {
 
   public function action_index()
   {
-    $article = $this->model->get_list_front($this->city_id, $page);
-    $this->_action_list(array('article'=>$article, 'type'=>'index')); 
+    $article = $this->model->get_list_front($this->city_id, $page=1);
+    $this->_action_list(array('article'=>$article,'category_id'=>1, 'type'=>'index')); 
   }
 
   public function action_category()

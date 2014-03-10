@@ -8,6 +8,9 @@ class Pretty {
     if (empty($str) || $str == '{}') {
       return $ret;
     }
+    elseif (is_array($str)) {
+      return $str;
+    }
     $ret = explode(',', UTF8::substr($str, 1, -1));
     return $ret;
   }
@@ -29,7 +32,7 @@ class Pretty {
   {
     $tag = self::postgrs_array($tag);
     if (empty($tag)) {
-      return '无标签';
+      return '';
     }
     $tag_str = '';
     $cache_tag = Cache::instance()->get('article_tag', FALSE);
@@ -39,7 +42,8 @@ class Pretty {
     }
     foreach($tag as $v) {
       if(isset($cache_tag[$v])) {
-        $tag_str .= $html?HTML::anchor('article_home/tag/'.$v, $cache_tag[$v]):$cache_tag[$v];
+        $tag_str .= $html?HTML::anchor('article_home/tag/'.$v, $cache_tag[$v]):$cache_tag[$v].' ';
+
       }
     }
     return $tag_str;
@@ -69,5 +73,7 @@ class Pretty {
   public static function article_relation($relation)
   {
     $article = self::postgrs_array($relation);
+    return false;
   }
+
 }

@@ -55,3 +55,6 @@
 [submodule "modules/map"]
 	path = modules/map
 	url = git@github.com:perhome/kohana-map.git
+[submodule "modules/qrcode"]
+	path = modules/qrcode
+	url = git@github.com:perhome/kohana-qrcode.git

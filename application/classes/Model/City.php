@@ -41,14 +41,21 @@ class Model_City extends Model {
     $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:cid and type=2')
               ->param(':display', TRUE)
               ->param(':cid', $city_id)
+              ->as_object()
               ->execute();
-    $underground = $query->as_array('cid', 'name');
-
-    $ret['group'] = $group;
+    $underground = array();
+    if ($query->count()) {
+      foreach($query as $v) {
+        $query_2 = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:cid and type=3')
+              ->param(':display', TRUE)
+              ->param(':cid', $v->cid)
+              ->execute();
+        $underground[$v->cid] = $query_2->as_array('cid', 'name');
+      }
+    }
+    $ret['shop'] = $group;
     $ret['underground'] = $underground;
     return $ret;
-
-
 
   }
 

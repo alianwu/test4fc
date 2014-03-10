@@ -59,13 +59,18 @@ class Model_House_New extends Model {
     $where = 'city_id=:city_id';
     $name = trim($data['keyword']);
     if ($name) {
-        $where .= ' AND (name like :keyword AND address like :keyword)';
+        $where .= ' AND (name like :keyword OR address like :keyword)';
         $parameters[':keyword'] = '%'.$name.'%';
     }
     $area = (int) $data['area']; 
     if ($area) {
       $where .= ' AND city_area=:city_area';
       $parameters[':city_area'] = $area;
+    }
+    $shop = (int) $data['shop']; 
+    if ($shop) {
+      $where .= ' AND city_area_shop=:city_area_shop';
+      $parameters[':city_area_shop'] = $shop;
     }
     $price = explode('-', $data['price']);
     if ($price) {
@@ -86,6 +91,11 @@ class Model_House_New extends Model {
       $where .= ' AND underground=:underground';
       $parameters[':underground'] = $underground;
     }
+    $underground_platform = (int) $data['underground_platform'];
+    if ($underground_platform) {
+      $where .= ' AND underground_platform=:underground_platform';
+      $parameters[':underground_platform'] = $underground_platform;
+    }
 
     $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
                 WHERE '.$where.' AND display=TRUE ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
@@ -104,7 +114,7 @@ class Model_House_New extends Model {
                 WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
                   ST_Transform(t.geo2, 26986), "
-                  .$radius.") 
+                  .$radius.") AND display=TRUE
                   ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo2) LIMIT :num OFFSET :start";
     $query = DB::query(Database::SELECT, $sql)
               ->param(':city_id', $cid)
@@ -182,18 +192,33 @@ class Model_House_New extends Model {
     $parameters = array();
     $upset = '';
     foreach($data as $k=>$v)  {
-      if ($v <> '') {
-        $parameters[':'.$k] = $v;
-        $upset .= $k.'=:'.$k.',';
-      }
-      else { 
-        unset($data[$k]);
+      switch($k) {
+      case 'display':
+          $upset .= 'display='.($v?'true':'false').', ';
+          unset($data[$k]);
+          break;
+        default:
+          if ($v <> '') {
+            $parameters[':'.$k] = $v;
+            $upset .= $k.'=:'.$k.',';
+          }
+          else { 
+            unset($data[$k]);
+          }
       }
     }
     $geo_update_sql = 'update house set geo2 = ST_GeomFromText(concat(\'POINT(\',geo[0], \' \', geo[1], \')\'), 4326) 
                               WHERE hid=:hid';
     if ($data['hid'] == 0) {
       unset($data['hid']);
+      $tmp_attachment = (array) Session::instance()->get('manager.house.add.attachment');
+      if ($tmp_attachment) {
+        unset($tmp_attachment['hid']);
+        foreach($tmp_attachment as $k => $v) {
+          $parameters[':'.$k] = 
+          $data[$k] = '{'.($v?implode(',', $v):'').'}';
+        }
+      }
       $field =  implode(',', array_keys($data));
       $value =  implode(', :', array_keys($data));
       $query = DB::query(Database::SELECT, 'INSERT INTO house ('. $field .', created) VALUES (:'. $value .', NOW()) RETURNING hid')
@@ -202,6 +227,7 @@ class Model_House_New extends Model {
                 ->execute();
       if ($query) {
         $hid =  $query->get('hid');
+        Session::instance()->delete('manager.house.add.attachment');
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
         $rcode = $hid;
       }
@@ -230,6 +256,14 @@ class Model_House_New extends Model {
     return $query? TRUE:FALSE;
   }
 
+  public function hot_many($hid, $hot)
+  {
+    $query = DB::query(Database::UPDATE, 'UPDATE house SET hot=:hot WHERE hid in ('.implode(',', $hid).')')
+              ->param(':hot', $hot)
+              ->execute();
+    return $query? TRUE:FALSE;
+  }
+
   public function delete_one($hid)
   {
     $query = DB::query(Database::DELETE, 'DELETE FROM house  WHERE hid=:hid')
@@ -237,4 +271,13 @@ class Model_House_New extends Model {
               ->execute();
     return $query? TRUE:FALSE;
   }
+
+  public function delete_many($hid)
+  {
+    $query = DB::query(Database::DELETE, 'DELETE FROM house  WHERE hid in ('.implode(',', $hid).')')
+              ->execute();
+    return $query? TRUE:FALSE;
+  }
+
+
 }

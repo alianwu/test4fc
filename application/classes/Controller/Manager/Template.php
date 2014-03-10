@@ -25,6 +25,9 @@ abstract class Controller_Manager_Template extends Controller_Template {
     if ($this->user === NULL) {
       $this->redirect('manager_sigin');
     }
+    elseif ($this->user['ip'] <> Request::$client_ip) {
+      $this->redirect('manager_valida');
+    }
     $this->pagination = Kohana::$config->load('pagination.manager');
   }
 

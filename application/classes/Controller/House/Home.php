@@ -4,8 +4,6 @@ class Controller_House_Home extends Controller_Template {
   
   protected $view_home;
   
-  // 附近房源
-  protected $radius = 1500000000000;
   protected $model_article, 
             $model_category; 
 
@@ -26,7 +24,7 @@ class Controller_House_Home extends Controller_Template {
   {
     $view =  View::factory($view_name);
     $view->set_global($data);
-    
+    $view->bind_global('map', $this->map);
     if ($this->auto_render) {
       $this->template->container->container = $view;
     }
@@ -56,7 +54,7 @@ class Controller_House_Home extends Controller_Template {
     if ($city_id == 0) {
       $city_id = $this->city_id;
     }
-    $radius  = (int) Arr::get($_GET, 'radius', $this->radius);
+    $radius  = (int) Arr::get($_GET, 'radius', $this->city_radius);
 
     $this->model = Model::factory('House_New');
     $house = $this->model->get_near_front($city_id, $lat, $lng, $radius, $page);

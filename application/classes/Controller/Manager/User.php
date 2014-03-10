@@ -46,7 +46,7 @@ class Controller_Manager_User extends Controller_Manager_Template {
     if( $post->check() ) {
       $data = $post->data();
       $data['id'] = $this->user['id'];
-      $ret = $this->model->update_one($data);
+      $ret = $this->model->update_passport($data);
       $this->result($ret);
     }
     else {

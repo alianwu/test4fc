@@ -1,0 +1,14 @@
+<?php defined('SYSPATH') or die('No direct script access.');
+
+class Controller_Test_Map extends Controller_Template {
+
+  public function action_index()
+  {
+    $this->template->container = View::factory('house/near');
+    // echo '<pre />';
+    // print_r($_SERVER);
+    // echo View::factory('test/geo')->render();
+    //~ Redis_Client::instance()->getDB(8)->flushDB();
+  }
+  
+} // End Cache

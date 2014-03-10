@@ -45,7 +45,9 @@ class Controller_Api_Article extends Controller_Api {
 
   public function action_faq_save()
   {
-
+    if ($this->user == NULL) {
+      return $this->error_user();
+    }
     $post = Validation::factory( Arr::extract($_POST, 
                                               array('body', 'aid')) );
     $post->rules('body', array(

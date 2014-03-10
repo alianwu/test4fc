@@ -10,13 +10,14 @@ class Controller_Api_Favorite extends Controller_Api {
 
   public function action_list()
   {
-    $page = max((int) Arr::get($_GET, 'page', 1), 1);
-    $type = Arr::get($_GET, 'type', '');
-    $value = Arr::get($_GET, 'value', '');
+    $page = max((int) Arr::get($_POST, 'page', 1), 1);
+    $type = Arr::get($_POST, 'type', '');
+    $value = Arr::get($_POST, 'value', '');
     $ids = explode('|', $value);
     if (empty($ids)) {
       return false;
     }
+
     $ids = array_map(function($v){ return (int)$v; }, $ids);
     switch($type) {
       case 'house_new':
