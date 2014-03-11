@@ -25,7 +25,7 @@ abstract class Controller_Template extends Controller {
   public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
-  public $city_radius = 200000;
+  public $city_radius = 2000;
   public $pagination = NULL;
   public $token = '';
   public $result = array('status'=>1, 'data'=>NULL);

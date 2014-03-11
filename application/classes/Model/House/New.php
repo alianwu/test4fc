@@ -4,22 +4,45 @@ class Model_House_New extends Model {
 
   protected $pagination;
 
+  public $cache_keys = array('manager.house_new10_hot', 'manager.house_new10_stick'); 
+  public $max_hot_stick = 3;
+
   function __construct()   
   {
     $this->pagination = Kohana::$config->load('pagination');
   }
-
-  public function get_list($city_id, $page = 0)
+  
+  public function clear_cache()
+  {
+    foreach($this->cache_keys as $v) {
+      Cache::instance()->delete($v);
+    }
+  }
+  public function get_list($city_id, $page = 0, $extra = NULL)
   {
     $pagination = Kohana::$config->load('pagination.manager');
-    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM house WHERE city_id=:city_id')
+
+    $where = '';
+    $parameters = array();
+    if (isset($extra['area']) && $extra['area']) {
+      $where .= ' AND city_area=:city_area';
+      $parameters[':city_area'] = $extra['area'];
+    }
+    if (isset($extra['keyword']) && $extra['keyword']) {
+      $where .= ' AND (name like :keyword or address like :keyword)';
+      $parameters[':keyword'] = '%'.$extra['keyword'].'%';
+    }
+
+    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM house WHERE city_id=:city_id'.$where)
               ->param(':city_id', $city_id)
+              ->parameters($parameters)
               ->as_object()
               ->execute();
     $ret['total'] = $query->get('count', 0);
     $query = DB::query(Database::SELECT, 'SELECT * FROM house 
-                WHERE city_id=:city_id ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
+                WHERE city_id=:city_id '.$where.' ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
+              ->parameters($parameters)
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))
               ->as_object()
@@ -44,6 +67,18 @@ class Model_House_New extends Model {
   {
     $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
                 WHERE city_id=:city_id AND hot=1 AND display=TRUE ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
+              ->param(':city_id', $city_id)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  public function get_latest_front($city_id, $page)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+                WHERE city_id=:city_id AND display=TRUE AND house_date_sale > current_date AND house_date_sale-90 < current_date ORDER BY stick DESC,  house_date_sale ASC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
@@ -137,7 +172,9 @@ class Model_House_New extends Model {
 
   public function get_one($hid)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid')
+    $query = DB::query(Database::SELECT, 'SELECT 
+      *, geo[0] AS lng, geo[1] AS lat
+                FROM house WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
     return $query->count() == 0? NULL: $query->current();
@@ -152,6 +189,24 @@ class Model_House_New extends Model {
     return $query->count() == 0? NULL : $query->current();
   }
 
+  public function attachmentd_save($hid, $type, $attachmentd)
+  {
+    $field = 'attachment_'.$type.'_d';
+    $_fields = 
+    $parameters = array();
+    foreach($attachmentd as $k => $v){
+      $_field = ':pgsql_'.$k;
+      $_fields[] = $_field;
+      $parameters[$_field] = $v;
+    }
+    $query = DB::query(Database::UPDATE, 'UPDATE house 
+      SET '.$field.'=ARRAY['. (implode(',', $_fields)) .']  WHERE hid=:hid')
+              ->param(':hid', $hid)
+              ->parameters($parameters)
+              ->execute();
+    return $query? TRUE : FALSE;
+  }
+  
   public function attachment_save($hid, $type, $attachment)
   {
     $field = 'attachment_'.$type;
@@ -180,6 +235,43 @@ class Model_House_New extends Model {
     return $query? TRUE : FALSE;
   }
 
+  public function get_hot_stick($type='hot', $hid=0)
+  {
+    $cache_key = 'manager.house_new10_'.$type;
+    $cache = (array)Cache::instance()->get($cache_key);
+    if (empty($cache)) {
+      $query =  DB::query(Database::SELECT, 'SELECT hid, updated FROM house WHERE '.$type.'=1 ORDER BY updated DESC')
+        ->execute();
+      if ($query->count()) {
+        $cache = $query->as_array();
+        Cache::instance()->set($cache_key, $cache);
+      }
+    }
+    $count = 0; 
+
+    foreach($cache as $v) {
+      $v['updated'] = strtotime($v['updated']);
+      if ($v['updated'] > ( time() - 3600*24 ) ) {
+        $count += 1;
+      }
+    }
+    if ($count < $this->max_hot_stick) {
+      if ($hid) {
+        array_unshift( $cache, array('hid'=>$hid, 'updated'=>date('Y-m-d H:i:s',time())));
+        if (count($cache) > $this->max_hot_stick) {
+          $last = array_pop($cache);
+          DB::query(Database::UPDATE, 'UPDATE house SET '.$type.'=0 WHERE hid=:hid')
+            ->param(':hid', $last['hid'])
+            ->execute();
+        }
+        Cache::instance()->set($cache_key, $cache);
+      }
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
   // return house id
   public function save_one($data)
   {
@@ -194,9 +286,29 @@ class Model_House_New extends Model {
     foreach($data as $k=>$v)  {
       switch($k) {
       case 'display':
-          $upset .= 'display='.($v?'true':'false').', ';
-          unset($data[$k]);
+          $upset .= $k.'=:'.$k.',';
+          $parameters[':'.$k] = $v?'true':'false';
           break;
+      case 'hot':
+          if ($this->get_hot_stick('hot') || !$v) {
+            $upset .= $k.'=:'.$k.',';
+            $parameters[':'.$k] = $v?1:0;
+            Cache::instance()->delete('manager.house_new10_'.$k);
+          }
+          else {
+            unset($data[$k]);
+          }
+        break;
+      case 'stick':
+          if ($this->get_hot_stick('stick') || !$v) {
+            $upset .= $k.'=:'.$k.',';
+            $parameters[':'.$k] = $v?1:0;
+            Cache::instance()->delete('manager.house_new10_'.$k);
+          }
+          else {
+            unset($data[$k]);
+          }
+        break;
         default:
           if ($v <> '') {
             $parameters[':'.$k] = $v;
@@ -212,11 +324,14 @@ class Model_House_New extends Model {
     if ($data['hid'] == 0) {
       unset($data['hid']);
       $tmp_attachment = (array) Session::instance()->get('manager.house.add.attachment');
+      $tmp_attachmentd = (array) Session::instance()->get('manager.house.add.attachmentd');
       if ($tmp_attachment) {
         unset($tmp_attachment['hid']);
         foreach($tmp_attachment as $k => $v) {
-          $parameters[':'.$k] = 
-          $data[$k] = '{'.($v?implode(',', $v):'').'}';
+          $parameters[':'.$k] = $data[$k] = '{'.($v?implode(',', $v):'').'}';
+          $tad_key = $k.'_d';
+          $tmp = $tmp_attachmentd[$tad_key];
+          $parameters[':'.$tad_key] = $data[$tad_key] = '{'.($tmp?implode(',', $tmp):'').'}';
         }
       }
       $field =  implode(',', array_keys($data));
@@ -227,12 +342,21 @@ class Model_House_New extends Model {
                 ->execute();
       if ($query) {
         $hid =  $query->get('hid');
+        if (isset($_POST['hot']) && $this->get_hot_stick('hot')) {
+          $this->get_hot_stick('hot', $hid);
+        }
+        if (isset($_POST['stick']) && $this->get_hot_stick('stick')) {
+          $this->get_hot_stick('stick', $hid);
+        }
         Session::instance()->delete('manager.house.add.attachment');
+        Session::instance()->delete('manager.house.add.attachmentd');
+        Cookie::delete('manager_house_add_attachment');
         DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
         $rcode = $hid;
       }
     }
     else {
+      $parameters[':updated'] = $data['updated'] = 'now()';
       $upset = substr($upset, 0, -1);
       $field =  implode(',', array_keys($data));
       $value =  implode(', :', array_keys($data));
@@ -269,11 +393,13 @@ class Model_House_New extends Model {
     $query = DB::query(Database::DELETE, 'DELETE FROM house  WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
+    $this->clear_cache();
     return $query? TRUE:FALSE;
   }
 
   public function delete_many($hid)
   {
+    $this->clear_cache();
     $query = DB::query(Database::DELETE, 'DELETE FROM house  WHERE hid in ('.implode(',', $hid).')')
               ->execute();
     return $query? TRUE:FALSE;

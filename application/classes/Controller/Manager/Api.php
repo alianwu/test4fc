@@ -42,7 +42,7 @@ class Controller_Manager_Api extends Controller_Api {
     $hid = (int )Arr::get($_GET, 'hid', 0);
     $attachment = Arr::get($_GET, 'file', 0);
     if ($this->tmpid) {
-      $tmp_attachment = (array) Session::get('manager.house.add.attachment');
+      $tmp_attachment = (array) Session::instance()->get('manager.house.add.attachment');
       if ( isset($tmp_attachment[$atype]) &&  ($key = array_search($attachment, $tmp_attachment[$atype])) !== false) {
           unset($tmp_attachment[$atype][$key]);
       }
@@ -51,7 +51,7 @@ class Controller_Manager_Api extends Controller_Api {
     else {
       $ret = $this->model_house->attachment_delete($hid, $atype, $attachment);
     }
-    $this->result($ret);
+    $this->result(0);
   }
 
   public function action_upload()
@@ -90,6 +90,24 @@ class Controller_Manager_Api extends Controller_Api {
     }
 
   }
+  
+  public function action_attachmentd_save()
+  {
+    $attachment = (int) Arr::get($_POST, 'attachment', 0);
+    $attachmentd  = Arr::get($_POST, 'attachmentd', '');
+    $hid = (int) Arr::get($_POST, 'hid', 0);
+    if ($this->tmpid) {
+      $tmp_attachmentd = (array) Session::instance()->get('manager.house.add.attachmentd');
+      $tmp_attachmentd['attachment_'.$attachment.'_d'] = $attachmentd;
+      $tmp_attachmentd['hid'] = $this->tmpid;
+      Session::instance()->set('manager.house.add.attachmentd', $tmp_attachmentd);
+    }
+    else {
+      $ret = $this->model_house->attachmentd_save($hid, $attachment, $attachmentd);
+    }
+    return $this->result(0);
+  }
+
   public function action_attachment_upload()
   {
     $atype = (int) Arr::get($_POST, 'atype', 0);

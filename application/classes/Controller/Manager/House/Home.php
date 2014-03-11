@@ -17,7 +17,10 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
   public function action_index()
   {
     $page = Arr::get($_GET, 'page', 1);
-    $house = $this->model->get_list($this->city_id, $page);
+    $data = array();
+    $data['area'] = Arr::get($_GET, 'area', 0);
+    $data['keyword'] = Arr::get($_GET, 'keyword', '');
+    $house = $this->model->get_list($this->city_id, $page, $data);
 
     $view = View::factory('manager/house/house_index');
     $view->bind('house', $house);
@@ -39,16 +42,17 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     if ($editor == false) {
       Cookie::set('manager_house_add_tmpid', 'tmpid-'.$tmpid);
       $attachment = (array) Session::instance()->get('manager.house.add.attachment');
-      print_r($_SESSION);
-      print_r($_COOKIE);
+      $attachmentd = (array) Session::instance()->get('manager.house.add.attachmentd');
     }
     else {
-      $attachment = $_POST;
+      Cookie::delete('manager_house_add_tmpid');
+      $attachment = $attachmentd = $_POST;
     }
     $underground = $this->model_city->get_city_pretty($this->city_id, 2);
     $this->template->container->detail = View::factory('manager/house/house_add')
                                               ->set('underground', $underground)
                                               ->set('attachment', $attachment)
+                                              ->set('attachmentd', $attachmentd)
                                               ->set('tmpid', $tmpid);
   }
   
@@ -82,6 +86,9 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
             array('max_length', array(':value', 30)),
           ),
       'hot' => array(
+            array('digit'),
+          ),
+      'stick' => array(
             array('digit'),
           ),
       'price' => array(

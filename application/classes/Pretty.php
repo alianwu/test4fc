@@ -2,17 +2,23 @@
 
 class Pretty {
 
-  public static function postgrs_array($str = NULL)
+  public static function postgrs_array($str = NULL, $index=NULL)
   {
     $ret = array();
     if (empty($str) || $str == '{}') {
-      return $ret;
     }
     elseif (is_array($str)) {
-      return $str;
     }
-    $ret = explode(',', UTF8::substr($str, 1, -1));
-    return $ret;
+    else {
+      $ret = str_getcsv(trim($str, '{}'));
+    }
+
+    if ($index === NULL) {
+      return $ret;
+    }
+    else {
+      return isset($ret[$index])?$ret[$index]:NULL;
+    }
   }
 
   public static function article_category($id)

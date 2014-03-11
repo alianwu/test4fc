@@ -68,6 +68,18 @@ class Controller_House_Home extends Controller_Template {
     $this->_action_list('house/list_new', $data);
   }
 
+  public function action_latest()
+  {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $this->model = Model::factory('House_New');
+    $house = $this->model->get_latest_front($this->city_id, $page);
+    $data = array(
+      'house' => $house,
+      'house_type' => 'latest',
+      'city_pretty' => $this->city_pretty,
+      'city_id' => $this->city_id);
+    $this->_action_list('house/list_new', $data);
+  }
   public function action_hot()
   {
     $page = max((int) Arr::get($_GET, 'page', 1), 1);
