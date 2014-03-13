@@ -40,7 +40,7 @@ class Controller_Api_City extends Controller_Api {
     $lat = Arr::get($_GET, 'lat', 0);
     $lng = Arr::get($_GET, 'lng', 0);
     if (is_numeric($lat) && is_numeric($lng) && $lat & $lng) {
-      $this->initialize_city($this->city_id, array('lat'=>$lat, 'lng'=>$lng));
+      $this->initialize_city($this->city_id, array('city_id'=>$this->city_id, 'lat'=>$lat, 'lng'=>$lng));
       $this->result(0);
     }
   }
@@ -77,12 +77,12 @@ class Controller_Api_City extends Controller_Api {
   protected function check_exist_city_name($name)
   {
     $pretty = array_flip($this->city_pretty);
-    if (in_array($name, $this->city_pretty)) {
-      return $pretty[$name];
+    if (FALSE !== $id = array_search($name, $this->city_pretty)) {
+      return $id;
     }
     $name = UTF8::substr($name, 0, -1);
-    if (in_array($name, $this->city_pretty)) {
-      return $pretty[$name];
+    if (FALSE !== $id = array_search($name, $this->city_pretty)) {
+      return $id;
     }
     return FALSE;
   }

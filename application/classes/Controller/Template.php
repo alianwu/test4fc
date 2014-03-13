@@ -84,7 +84,7 @@ abstract class Controller_Template extends Controller {
    return $this->user !== NULL; 
   }
 
-  public function get_user($session_name = 'user')
+  public function get_user($session_name = 'user', $sessionid=NULL)
   {
     $user = Session::instance()->get($session_name, NULL);
     return $user;
@@ -120,7 +120,7 @@ abstract class Controller_Template extends Controller {
 
     }
 
-    $geo = Session::instance()->get('geo', FALSE);
+    $geo = Session::instance()->get('geo');
     if ($geo && isset($geo['city_id']) && $this->city_id == $geo['city_id']) {
         $this->city_lng = $geo['lng'];
         $this->city_lat = $geo['lat'];

@@ -28,6 +28,10 @@ class Model_House_New extends Model {
       $where .= ' AND city_area=:city_area';
       $parameters[':city_area'] = $extra['area'];
     }
+    if (isset($extra['display']) && $extra['display']) {
+      $where .= ' AND display=:display';
+      $parameters[':display'] = $extra['display'];
+    }
     if (isset($extra['keyword']) && $extra['keyword']) {
       $where .= ' AND (name like :keyword or address like :keyword)';
       $parameters[':keyword'] = '%'.$extra['keyword'].'%';
@@ -273,7 +277,7 @@ class Model_House_New extends Model {
     }
   }
   // return house id
-  public function save_one($data)
+  public function save_one($data, $user=NULL)
   {
     $rcode = 0;
     $data['geo'] = $data['lng'] . ',' . $data['lat']; 
@@ -334,6 +338,8 @@ class Model_House_New extends Model {
           $parameters[':'.$tad_key] = $data[$tad_key] = '{'.($tmp?implode(',', $tmp):'').'}';
         }
       }
+      $data['author'] = $user['name'];
+      $parameters[':author'] = $user['name'];
       $field =  implode(',', array_keys($data));
       $value =  implode(', :', array_keys($data));
       $query = DB::query(Database::SELECT, 'INSERT INTO house ('. $field .', created) VALUES (:'. $value .', NOW()) RETURNING hid')

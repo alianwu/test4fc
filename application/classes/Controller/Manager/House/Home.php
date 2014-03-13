@@ -20,6 +20,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     $data = array();
     $data['area'] = Arr::get($_GET, 'area', 0);
     $data['keyword'] = Arr::get($_GET, 'keyword', '');
+    $data['display'] = Arr::get($_GET, 'display', '');
     $house = $this->model->get_list($this->city_id, $page, $data);
 
     $view = View::factory('manager/house/house_index');
@@ -193,7 +194,7 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     }
     if( $post->check() ) {
       $data = $post->data();
-      $ret = $this->model->save_one($data);
+      $ret = $this->model->save_one($data, $this->user);
       $this->result($ret?0:1);
       if ($ret) {
         $this->result(0);
