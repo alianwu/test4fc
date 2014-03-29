@@ -57,7 +57,7 @@ class Model_House_New extends Model {
   
   public function get_list_front($city_id, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[0] AS image FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat, attachment_9[0] AS image FROM house 
                 WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -69,7 +69,7 @@ class Model_House_New extends Model {
   
   public function get_hot_front($city_id, $page)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat, attachment_9[1] AS image  FROM house 
                 WHERE city_id=:city_id AND hot=1 AND display=TRUE ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -81,7 +81,7 @@ class Model_House_New extends Model {
 
   public function get_latest_front($city_id, $page)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat, attachment_9[1] AS image  FROM house 
                 WHERE city_id=:city_id AND display=TRUE AND house_date_sale > current_date AND house_date_sale-90 < current_date ORDER BY stick DESC,  house_date_sale ASC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -149,12 +149,12 @@ class Model_House_New extends Model {
   public function get_near_front($cid, $lat, $lng, $radius, $page=1)
   {
     $point = 'POINT('.$lng.' '.$lat.')';
-    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.geo[0] AS lng, t.geo[1] AS lat FROM house AS t
+    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.gps[0] AS lng, t.gps[1] AS lat FROM house AS t
                 WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
-                  ST_Transform(t.geo2, 26986), "
+                  ST_Transform(t.geo, 26986), "
                   .$radius.") AND display=TRUE
-                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo2) LIMIT :num OFFSET :start";
+                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo) LIMIT :num OFFSET :start";
     $query = DB::query(Database::SELECT, $sql)
               ->param(':city_id', $cid)
               ->param(':num', $this->pagination->default['items_per_page'])
