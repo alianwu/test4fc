@@ -6,14 +6,16 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
   {
     parent::before();
     $this->model = Model::factory('User'); 
+    $this->template->container = View::factory('manager/user/user');
   }
 
   public function action_index()
   {
-    $user = $this->model->get_list();
+    $data = Arr::extract($_GET, array('actived', 'keyword'));
+    $user = $this->model->get_list($data);
     $view = View::factory('manager/user/index');
     $view->bind_global('users', $user);
-    $this->template->container = $view;
+    $this->template->container->detail = $view;
   }
 
   public function action_actived()
@@ -23,6 +25,49 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
       $this->model->actived($id);
     }
     $this->action_index();
+  }
+
+  public function action_auth()
+  {
+    $id = (int) Arr::get($_GET, 'id');
+    $user = $this->model->get_one($id);
+    $user['auth'] = (array) json_decode($user['auth'], true);
+    if ($user) {
+      $view = View::factory('manager/user/auth');
+      $view->bind('user', $user);
+      $this->template->container->detail = $view;
+    }
+    else {
+      throw new Kohana_HTTP_Exception_404();
+    }
+  }
+
+  public function action_auth_update()
+  {
+    $post = Validation::factory( Arr::extract($_POST, 
+                                  array('id', 'auth',  'csrf')) );
+    $post->rules('id', array(
+          array('digit'),
+          array('not_empty'),
+        ))
+        ->rules('auth', array(
+          array('not_empty'),
+        ))
+        ->rules('csrf', array(
+          array('not_empty'),
+          array('Security::check'),
+        ));
+    if( $post->check() ) {
+      $data = $post->data();
+      $ret = $this->model->auth_update($data);
+      $this->result($ret);
+    }
+    else {
+      $error = $post->errors('user/auth');
+      $this->template->bind_global('error', $error);
+    }
+    
+    $this->action_auth();
   }
 
   public function action_delete()

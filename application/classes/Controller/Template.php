@@ -22,6 +22,8 @@ abstract class Controller_Template extends Controller {
   public $city_pretty = NULL;
   public $city_cache = NULL;
   public $city_area = NULL;
+
+  // default: Beijing
   public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
@@ -29,7 +31,10 @@ abstract class Controller_Template extends Controller {
   public $pagination = NULL;
   public $token = '';
   public $result = array('status'=>1, 'data'=>NULL);
+  public $cache;
   public $model;
+  public $model_city;
+  public $model_config;
 
   /**
    * @var  boolean  auto render template
@@ -47,31 +52,44 @@ abstract class Controller_Template extends Controller {
     if ($http_x_pjax) {
       $this->auto_render = FALSE;
     }
+    $this->cache = Cache::instance();
     $this->model_city = Model::factory('City');
-    $this->city_pretty = $this->model_city->get_city_pretty();
+    $this->model_config = Model::factory('Config');
+
+    $cache_core = $this->cache->get('core', FALSE); 
+    if ($cache_core == FALSE ) {
+      $cache_core = array();
+
+      $cache_core['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
+      $cache_core['city_area']   = $this->model_city->get_city_pretty($this->city_id, 1, TRUE, 1);
+      $cache_core['city_cache']  = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
+
+      $cache_core['core']    = $this->model_config->get_all();
+      $cache_core['setting'] = Kohana::$config->load('setting');
+      $cache_core['pagination'] = Kohana::$config->load('pagination.default');
+      
+      $this->cache->set('core', $cache_core);
+    }
+
+    $this->city_pretty = $cache_core['city_pretty'];
+    $this->city_area   = $cache_core['city_area'];
+    $this->city_cache  = $cache_core['city_cache'];
+
+    $this->core    =  $cache_core['core'];
+    $this->setting = $cache_core['setting'];
+    $this->pagination = $cache_core['pagination'];
+
 
     $this->user = $this->get_user('member.user');
-
     $this->initialize_city();
-
-    $this->city_area = $this->model_city->get_city_pretty($this->city_id);
-    $this->city_cache = $this->model_city->get_city_cache();
-    $this->core = Kohana::$config->load('core');
-    $this->setting = Kohana::$config->load('setting');
-    $this->map = Kohana::$config->load('map.baidu');
     $this->token = Security::token();
-
-    $this->pagination = Kohana::$config->load('pagination.default');
 
     if ($this->auto_render === TRUE)
     {
       // Load the template
       $this->template = View::factory($this->template);
-      $map = Kohana::$config->load('map.baidu');
-      $this->template->bind_global('map', $map);
       $this->template->bind_global('core', $this->core);
       $this->template->bind_global('setting', $this->setting);
-      $this->template->bind_global('map', $this->map);
       $this->template->bind_global('user', $this->user);
       $this->template->bind_global('city_pretty', $this->city_pretty);
       $this->template->bind_global('city_cache', $this->city_cache);
@@ -100,11 +118,10 @@ abstract class Controller_Template extends Controller {
       }
       Session::instance()->set('geo', $geo);
     }
-    elseif  ($city_id <> 0 
-        && isset($this->city_pretty[$city_id])) {
+    elseif ($city_id <> 0 && isset($this->city_pretty[$city_id])) {
       $this->city_id = $city_id;
     }
-    elseif ( $v = Arr::get($_SERVER, 'GEOIP_CITY') ) {
+    elseif ($v = Arr::get($_SERVER, 'GEOIP_CITY') ) {
       $ret = $this->model_city->get_city_from_value(strtolower($v));
       if ($ret) {
         $this->city_id = $ret->get('cid');
@@ -113,11 +130,8 @@ abstract class Controller_Template extends Controller {
         return TRUE;
       }
     }
-    elseif(FALSE) { 
-      // from baidu map
-    }
     else {
-
+      // do nothing
     }
 
     $geo = Session::instance()->get('geo');
@@ -129,19 +143,9 @@ abstract class Controller_Template extends Controller {
       $this->city_lng = $geo['lng'];
       $this->city_lat = $geo['lat'];
     }
-    elseif ($geo = Map::instance()->geocoder($this->city_pretty[$this->city_id], TRUE)) {
-      if($geo && isset($geo->result->location->lng) && $geo->result->location->lng <> '')
-      {
-        $this->city_lng = $geo->result->location->lng;
-        $this->city_lat = $geo->result->location->lat;
-      } 
-      else {
-        $this->city_lng = Arr::get($_SERVER, 'GEOIP_LONGITUDE');
-        $this->city_lat = Arr::get($_SERVER, 'GEOIP_LATITUDE');
-      }
-      Cache::instance()->set($cache_name, array('lng'=>$this->city_lng, 'lat'=>$this->city_lat));
+    else {
+      // do nothing
     }
-
     Cookie::set('city_id', $this->city_id);
     return TRUE;
   }
@@ -155,7 +159,7 @@ abstract class Controller_Template extends Controller {
       $this->result['status'] = 0;
     }
     elseif ($status === NULL) {
-      // pass
+      // do nothing
     }
     else {
       $this->result['status'] = (int) $status;
@@ -169,7 +173,6 @@ abstract class Controller_Template extends Controller {
       $this->template->bind_global('result', $this->result);
     }
   }
-
 
   /**
    * Assigns the template [View] as the request response.

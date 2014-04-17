@@ -12,14 +12,6 @@ class Model_City extends Model {
     return $query->count() == 0? NULL : $query;
   } 
 
-  public function get_city_cache($key = 'name')
-  {
-    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city')
-              ->param(':display', TRUE)
-              ->execute();
-    return $query->as_array('cid', $key);
-  }
-
   public function get_city_group($city_id)
   {
     $ret = array('group'=>NULL, 'underground'=>'');
@@ -70,11 +62,25 @@ class Model_City extends Model {
     return $query->count() == 0? NULL:$query->current();
   }
 
-  public function get_city_pretty($parent = 0, $type = 1, $output = 1)
+  public function get_city_pretty($parent = NULL, $type = NULL, $display= TRUE, $output = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city WHERE parent_cid=:parent_cid AND type=:type ORDER BY weight DESC, cid ASC')
-              ->param(':parent_cid', $parent)
-              ->param(':type', $type)
+    $where = 'true';
+    $params = array();
+    if ($parent !== NULL) {
+      $where .= ' AND parent_cid=:parent_cid';
+      $params[':parent_cid'] = $parent;
+    }
+    if ($type !== NULL) {
+      $where .= ' AND type=:type';
+      $params[':type'] = $type;
+    }
+    if ($display !== NULL) {
+      $where .= ' AND display=:display';
+      $params[':display'] = $display?'true':'false';
+    }
+    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city 
+                WHERE '.$where.' ORDER BY weight DESC, cid ASC')
+              ->parameters($params)
               ->execute();
     if ( $query->count() == 0 ) {
       return array(); 
@@ -84,9 +90,12 @@ class Model_City extends Model {
         return $query->as_array('cid', 'name');
         break;
       case 2:
-        return $query->as_array('value', 'name');
+        return $query->as_array('cid', 'value');
         break;
       case 3:
+        return $query->as_array('value', 'name');
+        break;
+      case 4:
         return $query->as_array('name', 'name');
         break;
       default:
@@ -96,10 +105,10 @@ class Model_City extends Model {
   
   public function get_city_one($cid)
   {
-    $query = DB::query(Database::SELECT, 'SELECT * FROM city WHERE cid=:cid')
+    $query = DB::query(Database::SELECT, 'SELECT * FROM city WHERE cid=:cid LIMIT 1')
               ->param(':cid', $cid)
               ->execute();
-    return $query->count() == 0? FALSE : Arr::get($query->as_array(), 0);
+    return $query->count() == 0? NULL : $query->current();
   }
   
   public function save_one($data)
