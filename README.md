@@ -1,12 +1,11 @@
 test4fc
-=======
-
+===================================  
 前端预览：   
-http://test.perhome.cn:881/works/test4fc/index.php  
-
-环境需求：  
-web服务器 nginx(apache) + geo模块  
-数据库  Postegres + postgis扩展  
-php版本 当前最新稳定版  
+http://fc.dev.perhome.cn
+===================================  
+环境需求
+Web服务器：ginx(apache) + geo模块  （传递GEO参数）  
+数据库：Postegres + postgis扩展  
+开发语言：php版本 当前最新稳定版  
 
 
