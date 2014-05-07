@@ -40,21 +40,12 @@
 [submodule "modules/captcha"]
 	path = modules/captcha
 	url = git@github.com:perhome/kohana-captcha.git
-[submodule "modules/accounts"]
-	path = modules/accounts
-	url = git@github.com:perhome/accounts.puhua.co.git
-[submodule "modules/article"]
-	path = modules/article
-	url = git@github.com:perhome/kohana-article.git
 [submodule "application/views"]
 	path = application/views
 	url = git@github.com:perhome/test4fc-theme.git
 [submodule "modules/purifier"]
 	path = modules/purifier
 	url = git@github.com:perhome/kohana-purifier.git
-[submodule "modules/map"]
-	path = modules/map
-	url = git@github.com:perhome/kohana-map.git
 [submodule "modules/qrcode"]
 	path = modules/qrcode
 	url = git@github.com:perhome/kohana-qrcode.git

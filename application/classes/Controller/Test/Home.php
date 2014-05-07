@@ -18,4 +18,17 @@ class Controller_Test_Home extends Controller_Test_Template {
     $this->template->content = View::factory('test/index');
   }
 
+
+  public function action_pgdb()
+  {
+    $data = array(
+      'city_id' => 1,
+      'city_area' => 3
+      );
+    //Model::factory('Company')->insert($data); 
+    Model::factory('Company')->delete(5); 
+    //Model::factory('Company')->update(5, $data); 
+    
+  }
+
 } // End Home
