@@ -29,7 +29,7 @@ class Model extends Kohana_Model {
     return $this;
   }
 
-  public function get_one($id, $is_object = TRUE, $display = NULL) 
+  public function get($id, $is_object = TRUE, $display = NULL) 
   {
     $extra_sql = '';
     $params = array();

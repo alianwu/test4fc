@@ -87,6 +87,7 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
     if( $post->check() ) {
       $data = $post->data();
       $ret = $this->model->save_one($data);
+      $this->cache->delete('cache');
       $this->result($ret);
     }
     else {

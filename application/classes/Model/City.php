@@ -149,7 +149,6 @@ class Model_City extends Model {
       if($query) {
         $rcode = 0;
       }
-
     }
     return $rcode;
   }

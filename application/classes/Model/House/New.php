@@ -149,12 +149,14 @@ class Model_House_New extends Model {
   public function get_near_front($cid, $lat, $lng, $radius, $page=1)
   {
     $point = 'POINT('.$lng.' '.$lat.')';
-    $sql = "SELECT t.*, t.attachment_9[1] AS image, t.phone[1] AS phone_1, t.phone[2] AS phone_2, t.phone[3] AS phone_3, t.phone[4] AS phone_4, t.gps[0] AS lng, t.gps[1] AS lat FROM house AS t
-                WHERE city_id=:city_id AND ST_DWithin(
+    $sql = "SELECT t.*, ST_Distance(ST_Transform(ST_GeomFromText('".$point."',4326),26986), ST_Transform(geo, 26986)) as distance, 
+                t.attachment_9[1] AS image, t.gps[0] AS lng, t.gps[1] AS lat, t.phone[0] AS phone_1
+              FROM house AS t
+              WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
-                  ST_Transform(t.geo, 26986), "
-                  .$radius.") AND display=TRUE
-                  ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo) LIMIT :num OFFSET :start";
+                  ST_Transform(t.geo, 26986), 
+                  ".$radius.") AND display=TRUE
+                ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo) LIMIT :num OFFSET :start";
     $query = DB::query(Database::SELECT, $sql)
               ->param(':city_id', $cid)
               ->param(':num', $this->pagination->default['items_per_page'])
@@ -177,7 +179,7 @@ class Model_House_New extends Model {
   public function get_one($hid)
   {
     $query = DB::query(Database::SELECT, 'SELECT 
-      *, geo[0] AS lng, geo[1] AS lat
+      *, gps[0] AS lng, gps[1] AS lat
                 FROM house WHERE hid=:hid')
               ->param(':hid', $hid)
               ->execute();
@@ -186,7 +188,7 @@ class Model_House_New extends Model {
 
   public function get_one_front($hid)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat FROM house WHERE hid=:hid AND display = TRUE LIMIT 1')
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat FROM house WHERE hid=:hid AND display = TRUE LIMIT 1')
               ->param(':hid', $hid)
               ->as_object()
               ->execute();
@@ -224,7 +226,8 @@ class Model_House_New extends Model {
   public function attachment_delete($hid, $type, $attachment)
   {
     $field = 'attachment_'.$type;
-    $query = DB::query(Database::UPDATE, 'UPDATE house SET '.$field.'=array_remove('.$field.',:attachment) WHERE hid=:hid')
+    $query = DB::query(Database::UPDATE, 
+                'UPDATE house SET '.$field.'=array_remove('.$field.',:attachment) WHERE hid=:hid')
               ->param(':hid', $hid)
               ->param(':attachment', urldecode($attachment))
               ->execute();
@@ -280,11 +283,14 @@ class Model_House_New extends Model {
   public function save_one($data, $user=NULL)
   {
     $rcode = 0;
-    $data['geo'] = $data['lng'] . ',' . $data['lat']; 
+    $data['gps'] = $data['lng'] . ',' . $data['lat']; 
+    $data['geo'] = '__&__ST_GeomFromText(\'POINT('.$data['lng'].' '.$data['lat'].')\', 4326)';
     $data['display'] = (bool) $data['display']; 
     $data['phone'] = '{'. $data['phone'] .'}'; 
+    $data['updated'] = '__&__now()';
 
     unset($data['csrf'], $data['lng'], $data['lat']);
+
     $parameters = array();
     $upset = '';
     foreach($data as $k=>$v)  {
@@ -323,8 +329,6 @@ class Model_House_New extends Model {
           }
       }
     }
-    $geo_update_sql = 'update house set geo2 = ST_GeomFromText(concat(\'POINT(\',geo[0], \' \', geo[1], \')\'), 4326) 
-                              WHERE hid=:hid';
     if ($data['hid'] == 0) {
       unset($data['hid']);
       $tmp_attachment = (array) Session::instance()->get('manager.house.add.attachment');
@@ -357,20 +361,15 @@ class Model_House_New extends Model {
         Session::instance()->delete('manager.house.add.attachment');
         Session::instance()->delete('manager.house.add.attachmentd');
         Cookie::delete('manager_house_add_attachment');
-        DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $hid)->execute();
         $rcode = $hid;
       }
     }
     else {
-      $parameters[':updated'] = $data['updated'] = 'now()';
       $upset = substr($upset, 0, -1);
-      $field =  implode(',', array_keys($data));
-      $value =  implode(', :', array_keys($data));
       $query = DB::query(Database::UPDATE, 'UPDATE house SET '. $upset .' WHERE hid=:hid')
                 ->parameters($parameters)
                 ->execute();
       if($query) {
-        DB::query(Database::UPDATE, $geo_update_sql)->param(':hid', $data['hid'])->execute();
         $rcode = $data['hid'];
      }
 
