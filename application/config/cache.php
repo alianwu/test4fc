@@ -5,16 +5,15 @@ return array
     'driver'             => 'redis',
     'group'              => 'default',
     'db'                 =>  8,
-    'default_expire'     => 3600,
+		'default_expire'     => Kohana::$environment == Kohana::PRODUCTION ? 3600 : 0,
   ),
 	'file'    => array(
 		'driver'             => 'file',
 		'cache_dir'          => APPPATH.'cache',
-		'default_expire'     => 3600,
+		'default_expire'     => Kohana::$environment == Kohana::PRODUCTION ? 3600 : 0,
 		'ignore_on_delete'   => array(
 			'.gitignore',
 			'.git',
-			'.svn'
-      ),
+			'.svn'),
   )
 );

@@ -63,17 +63,9 @@ require APPPATH.'bootstrap'.EXT;
  * If no source is specified, the URI will be automatically detected.
  */
  
-$cache = HTTP_Cache::factory(Cache::instance());
-$cache->cache_key_callback(function (Request $request) {
-    $uri     = $request->uri();
-    $query   = $request->query();
-    return sha1($uri.'?'.http_build_query($query, NULL, '&'));
-  });
-
-$quest = Request::factory(TRUE, array(), FALSE);
-$quest->client()->cache($cache);
-
-echo $quest->execute()
+$http_cache = HTTP_Cache::factory(Cache::instance());
+echo Request::factory(TRUE, array('cache'=>$http_cache), FALSE)
+      ->execute()
       ->send_headers(TRUE)
       ->body();
 

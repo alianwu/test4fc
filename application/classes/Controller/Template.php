@@ -52,22 +52,19 @@ abstract class Controller_Template extends Controller {
     if ($http_x_pjax) {
       $this->auto_render = FALSE;
     }
-    $this->cache = Cache::instance();
     $this->model_city = Model::factory('City');
     $this->model_config = Model::factory('Config');
 
+    $this->cache = Cache::instance();
     $cache_core = $this->cache->get('core', FALSE); 
-    if ($cache_core == FALSE ) {
+    if ($cache_core === FALSE ) {
       $cache_core = array();
-
       $cache_core['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
       $cache_core['city_area']   = $this->model_city->get_city_pretty($this->city_id, 1, TRUE, 1);
       $cache_core['city_cache']  = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
-
-      $cache_core['core']    = $this->model_config->get_all();
+      $cache_core['config']    = $this->model_config->get_all();
       $cache_core['setting'] = Kohana::$config->load('setting');
       $cache_core['pagination'] = Kohana::$config->load('pagination.default');
-      
       $this->cache->set('core', $cache_core);
     }
 
@@ -75,17 +72,17 @@ abstract class Controller_Template extends Controller {
     $this->city_area   = $cache_core['city_area'];
     $this->city_cache  = $cache_core['city_cache'];
 
-    $this->core    =  $cache_core['core'];
+    $this->core    =  $cache_core['config'];
     $this->setting = $cache_core['setting'];
     $this->pagination = $cache_core['pagination'];
 
-
     $this->user = $this->get_user('member.user');
     $this->initialize_city();
-    $this->token = Security::token();
 
+    $this->token = Security::token();
     if ($this->auto_render === TRUE)
     {
+      // $this->response->headers('cache-control', 'max-age=3600');
       // Load the template
       $this->template = View::factory($this->template);
       $this->template->bind_global('core', $this->core);
@@ -118,7 +115,8 @@ abstract class Controller_Template extends Controller {
       }
       Session::instance()->set('geo', $geo);
     }
-    elseif ($city_id <> 0 && isset($this->city_pretty[$city_id])) {
+    elseif ($city_id <> 0 
+              && isset($this->city_pretty[$city_id])) {
       $this->city_id = $city_id;
     }
     elseif ($v = Arr::get($_SERVER, 'GEOIP_CITY') ) {

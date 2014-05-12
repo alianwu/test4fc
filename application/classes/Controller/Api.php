@@ -13,7 +13,6 @@ class Controller_Api extends Controller_Template {
   {
     $code = (int) $this->request->param('id');
     $this->result($code == 0?1:$code);
-
   }
 
   public function error_user($error = NULL)
