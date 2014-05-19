@@ -62,7 +62,7 @@ abstract class Controller_Template extends Controller {
       $cache_core['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
       $cache_core['city_area']   = $this->model_city->get_city_pretty($this->city_id, 1, TRUE, 1);
       $cache_core['city_cache']  = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
-      $cache_core['config']    = $this->model_config->get_all();
+      $cache_core['config']    = (object) $this->model_config->get_all();
       $cache_core['setting'] = Kohana::$config->load('setting');
       $cache_core['pagination'] = Kohana::$config->load('pagination.default');
       $this->cache->set('core', $cache_core);
@@ -72,7 +72,8 @@ abstract class Controller_Template extends Controller {
     $this->city_area   = $cache_core['city_area'];
     $this->city_cache  = $cache_core['city_cache'];
 
-    $this->core    =  $cache_core['config'];
+    $this->core    =  
+    Model::$core = $cache_core['config'];
     $this->setting = $cache_core['setting'];
     $this->pagination = $cache_core['pagination'];
 

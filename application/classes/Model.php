@@ -15,6 +15,8 @@ class Model extends Kohana_Model {
   protected $field;
   protected $pagination;
 
+  public static $core = NULL;
+
   function __construct($table = NULL)
   {
     if ($table !== NULL) {

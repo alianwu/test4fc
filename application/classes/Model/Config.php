@@ -11,7 +11,7 @@ class Model_Config extends Model {
       $query = DB::query(Database::SELECT, 'SELECT * FROM config WHERE "group"=:group');
       $query->param(':group', $group);
     }
-    $query = (object) $query->execute()->as_array('name', 'value');
+    $query = $query->execute()->as_array('name', 'value');
     return $query;
   } 
 
