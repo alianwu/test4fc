@@ -7,11 +7,5 @@ class Controller_House_Search extends Controller_Template {
     parent::before();
   }
 
-  public function action_index()
-  {
-    $view =  View::factory('search/reslut');
-    $view->set('type', 'house_new');
-    $this->template->container = $view;
-  }
 
 } // End Home

@@ -1,14 +1,14 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Company extends Model {
+class Model_School extends Model {
 
-  protected $table = 'company';
-  protected $primary_key = 'cid';
+  protected $table = 'school';
+  protected $primary_key = 'sid';
 
 
   public function save_one($data) 
   {
-    $cid = $data['cid'];
+    $id = $data['sid'];
     $data['display'] = (bool) $data['display']; 
     $data['gps'] = $data['lng'] . ',' . $data['lat']; 
     $data['created'] = $data['updated'] = 'now()';
@@ -17,11 +17,7 @@ class Model_Company extends Model {
     $image = array();
     if (empty($data['image_history']) === FALSE) {
       foreach($data['image_history'] as $k=>$v) {
-        $image[] = array(
-          'src'=>$v, 
-          'alt'=> Arr::path($data, 'image_desc.'.$k), 
-          'group'=> Arr::path($data, 'image_group.'.$k),
-        );
+        $image[] = array('src'=>$v, 'alt'=> $data['image_desc'][$k]);
       }
     }
     if ($image) {
@@ -42,23 +38,18 @@ class Model_Company extends Model {
           $parameters[$pkey] = $v;
       }
     }
-    unset($data['csrf'], 
-      $data['image_history'], 
-      $data['image_desc'], 
-      $data['image_group'], 
-      $data['lng'], 
-      $data['lat']);
-    if ($cid == 0) {
-      unset($data['cid']);
+    unset($data['csrf'], $data['lng'], $data['image_history'], $data['image_desc'], $data['lat']);
+    if ($id == 0) {
+      unset($data['sid']);
       $field =  implode(', ', array_keys($data));
       $value =  implode(', :', array_keys($data));
-      $query = DB::query(Database::SELECT, 'INSERT INTO company ('. $field .') 
-            VALUES (:'. $value .') RETURNING cid')
+      $query = DB::query(Database::SELECT, 'INSERT INTO school ('. $field .') 
+            VALUES (:'. $value .') RETURNING sid')
         ->parameters($parameters)
         ->parameters_extra($parameters_extra)
         ->execute(); 
       if ($query->count()) {
-        $cid =  $query->get('cid');
+        $id =  $query->get('cid');
       }
       else {
         return FALSE;
@@ -68,18 +59,33 @@ class Model_Company extends Model {
       unset($data['created']);
       $field = array_map(function($v) {return $v.'=:'.$v;}, array_keys($data));
       $upset =  implode(', ', $field);
-      $query = DB::query(Database::UPDATE, 'UPDATE company SET '. $upset .' WHERE cid=:cid')
+      $query = DB::query(Database::UPDATE, 'UPDATE :table SET '. $upset .' WHERE sid=:sid')
         ->parameters($parameters)
+        ->param_extra(':table', $this->table)
         ->parameters_extra($parameters_extra)
         ->execute();
       if($query) {
-        $cid = $data['cid'];
+        $id = $data['sid'];
       }
       else {
         return FALSE;
       }
     }
-    return $cid;
+    return $id;
+  }
+  
+  public function get_pretty($city_id, $where=NULL) 
+  {
+    $sql = '';
+    $query = DB::query(Database::SELECT, 'SELECT * FROM :table 
+                WHERE city_id=:city_id '.$sql
+                  .' ORDER BY name ASC')
+              ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
+              ->execute()
+              ->as_array('sid', 'name');
+    return $query;
+
   }
 
   public function get_list($city_id, $where)
@@ -96,21 +102,28 @@ class Model_Company extends Model {
       $parameters[':display'] = $where['display'];
     }
     if (isset($where['keyword']) && $where['keyword']) {
-      $sql .= ' AND (cid = :cid or name like :keyword or address like :keyword)';
+      if (is_int($where['keyword'])) {
+        $sql .= ' OR sid = :sid ';
+      }
+      else {
+       $sql .='  OR name like :keyword OR address like :keyword';
+      }
       $parameters[':keyword'] = '%'.$where['keyword'].'%';
-      $parameters[':cid'] = $where['keyword'];
+      $parameters[':sid'] = $where['keyword'];
     }
     $query = DB::query(Database::SELECT, 'SELECT count(*) AS count 
-                FROM company WHERE city_id=:city_id '. $sql)
+                FROM :table 
+                  WHERE city_id=:city_id '. $sql)
               ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
               ->parameters($parameters)
-              ->as_object()
               ->execute();
     $ret['total'] = $query->get('count', 0);
-    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat FROM company 
+    $query = DB::query(Database::SELECT, 'SELECT * FROM :table 
                 WHERE city_id=:city_id '.$sql
-                  .' ORDER BY cid DESC LIMIT :num OFFSET :start ')
+                  .' ORDER BY sid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
               ->parameters($parameters)
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))

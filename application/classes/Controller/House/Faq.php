@@ -7,7 +7,7 @@ class Controller_House_Faq extends Controller_Template {
   public function before()
   {
     parent::before();
-    $this->model_house = Model::factory('House_New');
+    $this->model_house = Model::factory('House');
     $this->model = Model::factory('House_Faq');
     $this->model_detail = Model::factory('House_Faq_Detail');
   }

@@ -6,22 +6,17 @@ class Controller_Manager_Article_Category extends Controller_Manager_Template {
   {
     parent::before();
     $this->model = Model::factory('Article_Core_Category');
-    if ($this->auto_render == TRUE) { 
-      $this->template->container = View::factory('manager/article/article');
-    }
   }
 
   public function action_index()
   {
-    $category = $this->model->get_list();
-
+    $list = $this->model->get_list();
     $view = View::factory('manager/article/article_category');
-    $view->bind('category', $category);
-
-    $this->template->container->detail = $view;
+    $view->bind('list', $list);
+    $this->view($view);
   }
 
-  public function action_update()
+  public function action_save()
   {
     $fields = array(
       'acid' => array(
@@ -58,7 +53,6 @@ class Controller_Manager_Article_Category extends Controller_Manager_Template {
       $error = $post->errors('article/category');
       $this->template->bind_global('error', $error);
     }
-    
     $this->action_index();
   }
   
@@ -75,11 +69,12 @@ class Controller_Manager_Article_Category extends Controller_Manager_Template {
     $this->action_index();
   }
 
-  public function action_delete()
+  public function action_api()
   {
-    $acid = (int) Arr::get($_GET, 'acid', 0);
-    $ret = $this->model->delete_one($acid);
-    $this->result($ret);
+    $check = parent::action_api();
+    if ($check) {
+      //
+    }
     $this->action_index();
   }
 

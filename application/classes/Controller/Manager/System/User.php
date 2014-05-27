@@ -15,7 +15,7 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
     $user = $this->model->get_list($data);
     $view = View::factory('manager/user/index');
     $view->bind_global('users', $user);
-    $this->template->container->detail = $view;
+    $this->view($view);
   }
 
   public function action_actived()
@@ -35,7 +35,7 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
     if ($user) {
       $view = View::factory('manager/user/auth');
       $view->bind('user', $user);
-      $this->template->container->detail = $view;
+      $this->view($view);
     }
     else {
       throw new Kohana_HTTP_Exception_404();
@@ -70,6 +70,10 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
     $this->action_auth();
   }
 
+  public function action_editor()
+  {
+    $this->action_404();
+  }
   public function action_delete()
   {
     $id = (int) Arr::get($_GET, 'id');

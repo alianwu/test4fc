@@ -20,7 +20,8 @@ class Model_Accounts_Core extends Kohana_Model {
         'info' => '');
     $auth = Auth::instance();
     $query = DB::query(Database::SELECT, 
-                'SELECT id, username, password, actived  FROM "'. $this->table .'" WHERE email=:email LIMIT 1')
+        'SELECT id, username, password, actived  
+          FROM "'. $this->table .'" WHERE email=:email LIMIT 1')
               ->param(':email', $passport['passport'])
               ->execute();
     if ($query->count() == 0) {
@@ -34,7 +35,7 @@ class Model_Accounts_Core extends Kohana_Model {
     }
     else {
       $ret['error'] = FALSE;
-      Session::instance()->set($this->view . '.user', array('id'    => $query->get('id'), 
+      Session::instance()->set('accounts.'.$this->view, array('id'    => $query->get('id'), 
                                               'email' => $query->get('email', $passport['passport']),
                                               'ip' => Request::$client_ip,
                                               'name'  => $query->get('username')

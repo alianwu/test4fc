@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 class Model_City extends Model {
-
+  
   public function get_city($parent = 0, $type = 1)
   {
     $query = DB::query(Database::SELECT, 'SELECT * FROM city WHERE parent_cid=:parent_cid AND type=:type ORDER BY weight DESC, cid ASC')
@@ -78,7 +78,8 @@ class Model_City extends Model {
       $where .= ' AND display=:display';
       $params[':display'] = $display?'true':'false';
     }
-    $query = DB::query(Database::SELECT, 'SELECT cid, name, value FROM city 
+    $query = DB::query(Database::SELECT, 'SELECT cid, name, value 
+                FROM city 
                 WHERE '.$where.' ORDER BY weight DESC, cid ASC')
               ->parameters($params)
               ->execute();

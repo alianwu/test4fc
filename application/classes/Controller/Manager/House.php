@@ -1,17 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Manager_House_Home extends Controller_Manager_Template {
-
-  public $hid;
+class Controller_Manager_House extends Controller_Manager_Template {
 
   public function before()
   {
     parent::before();
-    $this->hid = Arr::get($_GET, 'hid', 0);
-    $this->model = Model::factory('House_New');
-    if ($this->auto_render == TRUE) { 
-      $this->template->container = View::factory('manager/house/house');
-    }
+    $this->model = Model::factory('House');
   }
 
   public function action_index()
@@ -22,11 +16,9 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     $data['keyword'] = Arr::get($_GET, 'keyword', '');
     $data['display'] = Arr::get($_GET, 'display', '');
     $house = $this->model->get_list($this->city_id, $page, $data);
-
     $view = View::factory('manager/house/house_index');
-    $view->bind('house', $house);
-
-    $this->template->container->detail = $view;
+    $view->bind('list', $house);
+    $this->view($view);
   }
   
   public function action_search()
@@ -37,44 +29,50 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     $this->template->container->detail = $view;
   }
 
-  public function action_add($editor=false)
+  public function action_editor()
   { 
-    $tmpid = Text::random();
-    if ($editor == false) {
-      Cookie::set('manager_house_add_tmpid', 'tmpid-'.$tmpid);
-      $attachment = (array) Session::instance()->get('manager.house.add.attachment');
-      $attachmentd = (array) Session::instance()->get('manager.house.add.attachmentd');
+    if ($this->request->method() == HTTP_Request::GET) {
+      $id = (int) Arr::get($_GET, 'id', 0);
+      $data = $this->model->get($id, FALSE);
+      if ($data) {
+        $_POST = $data;
+        $_POST['schools'] = json_decode($_POST['schools'], TRUE); 
+        $_POST['image'] = json_decode($_POST['image'], TRUE); 
+      }
     }
     else {
-      Cookie::delete('manager_house_add_tmpid');
-      $attachment = $attachmentd = $_POST;
+      if ($sl = Arr::get($_POST, 'school', array(array('s'=>0,'sb'=>'')))) {
+        foreach ($sl as $k => $v) {
+          $_POST['schools'][] =  array('s'=>$v, 'sb'=>Arr::path($_POST, 'school_building.'.$k));
+        }
+      }
+      if ($ih = Arr::get($_POST, 'image_history', FALSE)) {
+        foreach ($ih as $k => $v) {
+          $_POST['image'][] =  array(
+            'src'=>$v, 
+            'group'=>Arr::path($_POST, 'image_group.'.$k),
+            'alt'=>Arr::path($_POST, 'image_desc.'.$k));
+        }
+      }
     }
+    $school = Model::factory('School')->get_pretty($this->city_id);
     $underground = $this->model_city->get_city_pretty($this->city_id, 2);
-    $this->template->container->detail = View::factory('manager/house/house_add')
-                                              ->set('underground', $underground)
-                                              ->set('attachment', $attachment)
-                                              ->set('attachmentd', $attachmentd)
-                                              ->set('tmpid', $tmpid);
-  }
-  
-  public function action_editor()
-  {
-    Cookie::delete('manager.house.add.tmpid');
-    $data = $this->model->get_one($this->hid);
-    if($data === FALSE) {
-      throw new Kohana_HTTP_Exception_404();
-    }
-
-    $_POST = $data;
-    $this->action_add(true);
+    $view =  View::factory('manager/house/house_editor')
+               ->bind('underground', $underground)
+               ->bind('school', $school);
+    $this->view($view);
   }
 
-  public function action_update()
+  public function action_save()
   {
     $fields = array(
       'hid' => array(
             array('not_empty'),
             array('digit'),
+          ),
+      'type' => array(
+            array('digit'),
+            array('not_empty'),
           ),
       'city_id' => array(
             array('digit'),
@@ -138,14 +136,9 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
             array('max_length', array(':value', 300)),
           ),
       'school' => array(
-            array('max_length', array(':value', 30)),
-          ),
+            array('is_array')),
       'school_building' => array(
-            array('max_length', array(':value', 100)),
-          ),
-      'school_near' => array(
-            array('max_length', array(':value', 30)),
-          ),
+            array('is_array')),
       'city_area' => array(
             array('digit'),
           ),
@@ -168,6 +161,15 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
             array('not_empty'),
             array('max_length', array(':value', 30)),
           ),
+      'image_history' => array(
+            array('not_empty'),
+            array('is_array')),
+      'image_desc' => array(
+            array('not_empty'),
+            array('is_array')),
+      'image_group' => array(
+            array('not_empty'),
+            array('is_array')),
       'lat' => array(
             array('numeric'),
           ),
@@ -195,44 +197,24 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     if( $post->check() ) {
       $data = $post->data();
       $ret = $this->model->save_one($data, $this->user);
-      $this->result($ret?0:1);
       if ($ret) {
         $this->result(0);
-        $this->action_update_success($ret);
+        $result = View::factory('manager/house/house_editor_success');
+        $result->set('ret', $ret);
+        $this->view($result);
         return 0;
       }
       else {
-        $this->result(0);
+        $this->result(1);
       }
     }
     else {
       $error = $post->errors('city/add');
       $this->template->bind_global('error', $error);
     }
-    
-    $this->action_add();
-  }
-  
-
-  public function action_update_success($hid = NULL)
-  {
-    $this->template->container->detail = View::factory('manager/house/house_add_success')
-                                              ->set('hid', $hid);
+    $this->action_editor();
   }
 
-  public function action_attachment($hid = NULL)
-  {
-    $hid = Arr::get($_GET, 'hid', $hid);
-    $attachment = $this->model->get_one($hid);
-    if ($attachment) {
-      $this->template->container->detail = View::factory('manager/house/house_attachment')
-        ->set('hid', $hid)
-        ->set('attachment', $attachment);
-    }
-    else {
-      throw new Kohana_HTTP_Exception_404();
-    }
-  }
   public function action_display()
   {
     $ret = $this->model->display_one($this->hid);
@@ -240,10 +222,12 @@ class Controller_Manager_House_Home extends Controller_Manager_Template {
     $this->action_index();
   }
 
-  public function action_delete()
+  public function action_api()
   {
-    $ret = $this->model->delete_one($this->hid);
-    $this->result($ret);
+    $check = parent::action_api();
+    if ($check) {
+      //
+    }
     $this->action_index();
   }
 

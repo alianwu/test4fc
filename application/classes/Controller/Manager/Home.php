@@ -4,7 +4,8 @@ class Controller_Manager_Home extends Controller_Manager_Template {
   
   public function action_index()
   {
-    $this->template->container = View::factory('manager/index');
+    $view = View::factory('manager/index');
+    $this->view($view); 
   }
 
 } 

@@ -1,16 +1,16 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Article_Core extends Kohana_Model {
+class Model_Article_Core extends Model {
 
   public  $vew;
   public  $table = 'article';
-  protected $pagination;
+  public  $primary_key = 'aid';
   protected $model_tag = 'Article_Core_Tag';
   protected $model_withtag = 'Article_Core_Withtag';
 
   function __construct()   
   {
-    $this->pagination = Kohana::$config->load('pagination');
+    parent::__construct();
     $this->model_tag = Model::factory($this->model_tag);
     $this->model_withtag = Model::factory($this->model_withtag);
   }
@@ -54,18 +54,6 @@ class Model_Article_Core extends Kohana_Model {
               ->param(':category', $category)
               ->execute();
     return $query->count() == 0 ?  NULL : $query->current();
-  }
-
-  public function get_list_front($city_id, $page = 1)
-  {
-    $query = DB::query(Database::SELECT, 
-                'SELECT * FROM "'. $this->table .'" 
-                  WHERE  display=true ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
-              ->param(':num', $this->pagination->default['items_per_page'])
-              ->param(':start', ($page-1) * $this->pagination->default['items_per_page'])
-              ->as_object()
-              ->execute();
-    return $query->count() == 0 ?  NULL : $query;
   }
 
   public function get_list_favorite(array $ids, $page=1)
@@ -112,14 +100,16 @@ class Model_Article_Core extends Kohana_Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_list_category_front($city_id, $category_id, $page = 1)
+  public function get_list_front($city_id, $category_id, $page = 1)
   {
     $query = DB::query(Database::SELECT, 
-                'SELECT * FROM "'. $this->table .'" 
-                  WHERE category=:category AND display=true ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
+                'SELECT * FROM :table
+                  WHERE category=:category AND display=true 
+                    ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', ($page-1) * $this->pagination->default['items_per_page'])
               ->param(':category', $category_id)
+              ->param_extra(':table', $this->table)
               ->as_object()
               ->execute();
     return $query->count() == 0 ?  NULL : $query;
@@ -171,14 +161,6 @@ class Model_Article_Core extends Kohana_Model {
     return $ret;
   }
 
-  public function delete_one($aid)
-  {
-    $query = DB::query(Database::DELETE, 
-                'DELETE FROM "'. $this->table .'" WHERE aid=:aid')
-              ->param(':aid', $aid)
-              ->execute();
-    return $query?  TRUE : FALSE;
-  }
 
   public function save_one($data)
   {
@@ -282,21 +264,6 @@ class Model_Article_Core extends Kohana_Model {
               ->param(':aid', $aid)
               ->execute();
     return $query ?  TRUE : FALSE;
-  }
-  public function hit_one($aid)
-  {
-    $query = DB::query(Database::UPDATE, 'UPDATE "'.$this->table.'" SET hit=hit+1  WHERE aid=:aid')
-              ->param(':aid', $aid)
-              ->execute();
-    return $query ?  TRUE : FALSE;
-  }
-
-  public function display_one($aid)
-  {
-    $query = DB::query(Database::UPDATE, 'UPDATE "'. $this->table .'" SET display= NOT display  WHERE aid=:aid')
-              ->param(':aid', $aid)
-              ->execute();
-    return $query ? TRUE : FALSE;
   }
 
   public function check_one($aid)

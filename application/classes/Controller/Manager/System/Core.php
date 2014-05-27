@@ -5,27 +5,23 @@ class Controller_Manager_System_Core extends Controller_Manager_Template {
   public function before()
   {
     parent::before();
-    $this->model = Model::factory('Config'); 
-    $this->template->container = View::factory('manager/system/system');
   }
 
   public function action_index()
   {
-    $core = $this->model->get_all();
+    $_POST = $config = $this->model_config->get_all();
     $view = View::factory('manager/system/core');
-    $view->bind('post', $core);
-    $this->template->container->detail = $view;
+    $this->view($view);
   }
 
 
   public function action_update()
   {
-    $post = Validation::factory( Arr::extract($this->request->post(), 
-                                  array('core', 'map', 'csrf')) );
+    $post = Validation::factory($_POST);
     $post->rules('core', array(
           array('not_empty'),
         ))
-        ->rules('map', array(
+        ->rules('faq', array(
           array('not_empty'),
         ))
         ->rules('csrf', array(
@@ -36,16 +32,12 @@ class Controller_Manager_System_Core extends Controller_Manager_Template {
     if( $post->check() ) {
       $data = $post->data();
       unset($data['csrf']);
-      foreach($data as $k => $v) {
-        foreach($v as $_k => $_v) {
-          $this->model->update_one($_k, $_v, $k);
-        }
-      } 
+      $this->model_config->update_one($data);
       $this->result(0);
     }
     else {
       $error = $post->errors('system/core');
-      $this->template->bind_global('error', $error);
+      $this->result(1, NULL, array('error'=>$error));
     }
     
     $this->action_index();

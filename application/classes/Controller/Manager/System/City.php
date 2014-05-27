@@ -24,8 +24,6 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
       $this->template->bind_global('type', $this->type);
       $this->template->bind_global('cid', $this->cid);
       $this->template->bind_global('pcid', $this->pcid);
-      
-      $this->template->container = View::factory('manager/system/city');
     }
   }
 
@@ -36,25 +34,22 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
     $view = View::factory('manager/system/city_index');
     $view->bind_global('city', $city);
 
-    $this->template->container->detail = $view;
-  }
-  
-  public function action_add()
-  {  
-    $this->template->container->detail = View::factory('manager/system/city_add');
+    $this->view($view);
   }
   
   public function action_editor()
-  {
-    $data = $this->model->get_city_one($this->cid);
-
-    if($data === FALSE) {
-      throw new Kohana_HTTP_Exception_404();
+  {  
+    if ($this->cid) {
+      $data = $this->model->get_city_one($this->cid);
+      if($data) {
+        $_POST = $data;
+      }
     }
-    $_POST = $data;
-    $this->action_add();
+    $view = View::factory('manager/system/city_editor');
+    $this->view($view);
   }
-  public function action_update()
+  
+  public function action_save()
   {
     $post = Validation::factory( Arr::extract($_POST, 
                                   array('cid', 'parent_cid', 'name', 'value', 'type', 'display', 'csrf', 'weight')) );
@@ -95,7 +90,7 @@ class Controller_Manager_System_City extends Controller_Manager_Template {
       $this->template->bind_global('error', $error);
     }
     
-    $this->action_add();
+    $this->action_editor();
   }
 
   public function action_display()

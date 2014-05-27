@@ -1,25 +1,25 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_House_Faq extends Model {
+class Model_Faq extends Model {
 
-  protected $pagination;
+  protected $table = 'faq';
+  protected $primary_key = 'fid';
 
-  function __construct()   
+  public function get_list($city_id, $where = NULL)
   {
-    $this->pagination = Kohana::$config->load('pagination');
-  }
+    $page = max((int) (isset($where['page'])? $where['page'] : 1), 1);
 
-  public function get_list($city_id, $page = 0)
-  {
-    $pagination = Kohana::$config->load('pagination.manager');
-    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM house_faq WHERE city_id=:city_id')
+    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM :table WHERE  city_id=:city_id')
               ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
               ->as_object()
               ->execute();
     $ret['total'] = $query->get('count', 0);
-    $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
+
+    $query = DB::query(Database::SELECT, 'SELECT * FROM :table
                 WHERE city_id=:city_id ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))
               ->as_object()
@@ -30,8 +30,9 @@ class Model_House_Faq extends Model {
 
   public function get_list_front($hid, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT * FROM house_faq
+    $query = DB::query(Database::SELECT, 'SELECT * FROM :faq
                 WHERE hid=:hid AND display=true ORDER BY created DESC, fid DESC LIMIT :num OFFSET :start ')
+              ->param_extra(':table', $this->table)
               ->param(':hid', $hid)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))

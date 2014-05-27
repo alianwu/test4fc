@@ -6,7 +6,7 @@ class Controller_Api_Article extends Controller_Api {
   {
     parent::before();
 
-    $this->model = Model::factory('Article');
+    $this->model_article = Model::factory('Article');
     $this->model_faq = Model::factory('Article_Faq');
     $this->model_category = Model::factory('Article_Category');
   }
@@ -15,7 +15,7 @@ class Controller_Api_Article extends Controller_Api {
   {
     $aid = (int) Arr::get($_POST, 'aid', 0);
     if ($aid) {
-      $ret = $this->model->support_one($aid, $num); 
+      $ret = $this->model_article->support_one($aid, $num); 
       if ($ret) {
         $this->result(0);
       }
@@ -35,11 +35,22 @@ class Controller_Api_Article extends Controller_Api {
   public function action_search()
   {
     $data = Arr::extract($_GET, array('keyword', 'category', 'day',  'page'));
-    $data = $this->model->get_search_front($this->city_id, $data);
+    $data = $this->model_article->get_search_front($this->city_id, $data);
     if ($data) {
       $data = $data->as_array();
       $category = $this->model_category->get_list_pretty();
       $this->result(0, $data, array('category'=>$category));
+    }
+  }
+  
+  public function action_list()
+  {
+    $id = (int) Arr::get($_GET, 'id', 0);
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    if ($id 
+      && $article = $this->model_article->get_list_front($this->city_id, $id, $page)) {
+        $category = $this->model_category->get_list_pretty();
+        $this->result(0, $article, array('category'=>$category));
     }
   }
 

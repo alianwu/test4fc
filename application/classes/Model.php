@@ -15,14 +15,12 @@ class Model extends Kohana_Model {
   protected $field;
   protected $pagination;
 
-  public static $core = NULL;
-
   function __construct($table = NULL)
   {
     if ($table !== NULL) {
       $this->table = $table;
     }
-    $this->pagination = Kohana::$config->load('pagination.default');
+    $this->pagination = Kohana::$config->load('pagination');
 	}
   
   public function table($table) 
@@ -33,10 +31,10 @@ class Model extends Kohana_Model {
 
   public function get($id, $is_object = TRUE, $display = NULL) 
   {
-    $extra_sql = '';
+    $sql = '';
     $params = array();
     if ($display !== NULL) {
-      $extra_sql = ' AND display=:display';
+      $sql = ' AND display=:display';
       if ($display === TRUE) {
         $params[':display'] = 'true';
       }
@@ -49,8 +47,10 @@ class Model extends Kohana_Model {
     }
     $params[':id'] = $id;
     $query = DB::query(Database::SELECT, 
-                  'SELECT * FROM "'. $this->table .'" 
-                      WHERE '. $this->primary_key .'=:id '. $extra_sql .' LIMIT 1')
+                  'SELECT * FROM :table 
+                      WHERE :primary_key = :id '. $sql .' LIMIT 1')
+                ->param_extra(':table', $this->table)
+                ->param_extra(':primary_key', $this->primary_key)
                 ->parameters($params);
     if ($is_object === TRUE) {
       $query = $query->as_object();
@@ -59,36 +59,31 @@ class Model extends Kohana_Model {
     return $query->count() == 0 ?  NULL : $query->current();
   }
 
-  public function get_more($where, $start = 0, $limit = 20, $is_object = TRUE, $display = NULL)
+  public function get_more($where =NULL, $start = 0, $limit = 20, $is_object = TRUE)
   {
-    $where = '';
+    $wsql = array('true');
     $params = array();
-    if ($display !== NULL) {
-      $where = ' AND display=:display';
-      if ($display === TRUE) {
-        $params[':display'] = 'true';
-      }
-      elseif($display === FALSE) {
-        $params[':display'] = 'false';
-      }
-      else {
-        $params[':display'] = $display;
+    if ($where !== NULL) {
+      foreach($where as $k=>$v) {
+        $pkey = ':'.$k;
+        $params[$pkey] = $v;
+        $wsql[] = $k.'='.$pkey;
       }
     }
-    list ($_where, $_params) = $where;
-    $params += $_params;
-    $where = $_where . $where;
     $query = DB::query(Database::SELECT, 
-                  'SELECT * FROM "'. $this->table .'" 
-                      WHERE '. $where .' LIMIT '.$limit.' OFFSET '.$start)
-                ->parameters($params);
+                'SELECT * FROM :table 
+                    WHERE '. (implode(' AND ', $wsql)) .' LIMIT '.$limit.' OFFSET '.$start)
+              ->param_extra(':table', $this->table)
+              ->param(':start', $start)
+              ->param(':limit', $limit)
+              ->parameters($params);
     if ($is_object === TRUE) {
       $query = $query->as_object();
     }
     return $query->execute();
   } 
 
-  public function insert($data, $return = NULL)
+  public function save($data, $return = NULL)
   {
     $parms = array();
     foreach($data as $k=>$v) {
@@ -101,8 +96,9 @@ class Model extends Kohana_Model {
     }
     $keys = array_keys($data);
     $query = DB::query(Database::SELECT, 
-                'INSERT INTO  "'. $this->table .'" ('. (implode(',', $keys)) .') 
+                'INSERT INTO :table  ('. (implode(',', $keys)) .') 
                     VALUES (:'. (implode(', :', $keys)) .') '.$return_sql)
+              ->param_extra(':table', $this->table)
               ->parameters($params)
               ->execute();
     if ($return !== NULL) {
@@ -111,32 +107,81 @@ class Model extends Kohana_Model {
     return  $query->count() ? TRUE : FALSE;
   } 
 
-  public function update($id, array $data =NULL)
+  public function update($id, array $data =NULL, array $data_extra = NULL)
   {
-    $sets = 
-    $parms = array();
-    foreach($data as $k=>$v) {
-      $p_key = ':'.$k;
-      $sets[] = $k.'='.$p_key;
-      $params[$p_key] = $v;
+    $upset = $parms = $params_extra = array();
+    if($data !== NULL) {
+      foreach($data as $k=>$v) {
+        $pkey = ':'.$k;
+        $upset[] = $k.'='.$pkey;
+        $params[$pkey] = $v;
+      }
+    }
+    if($data_extra !== NULL) {
+      foreach($data_extra as $k=>$v) {
+        $pkey = ':'.$k;
+        $upset[] = $k.'='.$pkey;
+        $params_extra[$pkey] = $v;
+      }
     }
     $params[':id'] = $id;
     $query = DB::query(Database::UPDATE, 
-                'UPDATE "'. $this->table .'" SET '. (implode(',', $sets)) 
-                  .' WHERE '. $this->primary_key .'=:id')
+                'UPDATE :table SET '.(implode(',', $upset)).' WHERE :pkey=:id')
+              ->param_extra(':table', $this->table)
+              ->param_extra(':pkey', $this->primary_key)
               ->parameters($params)
+              ->parameters_extra($params_extra)
               ->execute();
-    return $query ? TRUE : FALSE;
+    return $query;
   } 
-
+  
   public function delete($id)
   {
-    $query = DB::query(Database::DELETE, 
-                'DELETE FROM "'. $this->table .'" WHERE '. $this->primary_key .'=:id')
-              ->param(':id', $id)
-              ->execute();
-    print_r($query);
-    return $query?  TRUE : FALSE;
+    $query = DB::query(Database::DELETE, 'DELETE FROM :table  
+                  WHERE :primary_key = :id')
+              ->param_extra(':table', $this->table)
+              ->param_extra(':primary_key', $this->primary_key);
+
+    if (is_array($id)) {
+      foreach($id as $v) {
+        $query->param(':id', $v)->execute();
+      }
+      return 1;
+    }
+    else {
+      return $query->param(':id', $id)->execute();
+    }
   }
+
+  public function update_hot($id, $field='hot')
+  {
+    switch($field) {
+      case 'display':
+        $sql = 'UPDATE :table SET display= NOT display  WHERE :primary_key :op :id';
+        break;
+      case 'hit':
+        $sql = 'UPDATE :table SET hit = hit+1  WHERE :primary_key :op :id';
+        break;
+      case 'hot':
+      default:
+        $sql = 'UPDATE :table SET hot= NOT hot  WHERE :primary_key :op :id';
+    }
+    $query = DB::query(Database::UPDATE, $sql)
+              ->param_extra(':table', $this->table)
+              ->param_extra(':primary_key', $this->primary_key);
+    if (is_array($id)) {
+      $id = Arr::map(function($v){ return (int) $v; }, $id);
+      $query
+        ->param_extra(':op', ' in ')
+        ->param_extra(':id', '('.(implode(', ', $id)).')');
+    }
+    else {
+      $query
+        ->param_extra(':op', '=')
+        ->param(':id', $id);
+    }
+    return $query->execute();
+  }
+
 
 }

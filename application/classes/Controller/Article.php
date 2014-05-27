@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Article_Home extends Controller_Template {
+class Controller_Article extends Controller_Template {
 
   protected $model_category,
     $model_tag,
@@ -10,7 +10,7 @@ class Controller_Article_Home extends Controller_Template {
   {
     parent::before();
 
-    $this->model = Model::factory('Article');
+    $this->model_article = Model::factory('Article');
     $this->model_tag = Model::factory('Article_Tag');
     $this->category = Cache::instance()->get('article_category', FALSE);
     if ($this->category == FALSE) {
@@ -65,16 +65,16 @@ class Controller_Article_Home extends Controller_Template {
   public function action_detail()
   {
     $id = (int) $this->request->param('id'); 
-    $article = $this->model->get_one_front($id);
-    if ($article == NULL) {
+    if ($id 
+      && $article = $this->model_article->get_one_front($id)) {
+      $this->model_article->update_hot($id, 'hit');
+      $view = View::factory('article/detail');
+      $view->bind_global('article', $article);
+      $this->view($view);
+    }
+    else {
       throw Kohana_HTTP_Exception_404();
     }
-
-    $view = View::factory('article/detail');
-    $view->bind_global('article', $article);
-    $this->model->hit_one($id);
-    $this->template->container = $view;
-
   }
 
 } // End Home

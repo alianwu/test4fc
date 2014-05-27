@@ -1,9 +1,10 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Article_Core_Category extends Kohana_Model {
+class Model_Article_Core_Category extends Model {
 
   public  $vew;
   public  $table = 'article_category';
+  public  $primary_key = 'acid';
 
   public  function get_list() 
   {

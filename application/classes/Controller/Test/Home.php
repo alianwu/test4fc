@@ -5,10 +5,13 @@ class Controller_Test_Home extends Controller_Test_Template {
   public function before()
   {
     parent::before();
-    $this->response->headers('cache-control', 'max-age=5');
+    //$this->response->headers('cache-control', 'max-age=5');
   }
   public function action_index()
   {
+    $a = array('a','b', 'c');
+    print_r($a);
+    exit;
     $geo['lat'] = '39.853101';
     $geo['lng'] = '116.423321';
     $geo['city_id'] = 1;

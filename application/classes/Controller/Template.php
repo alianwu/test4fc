@@ -14,9 +14,11 @@ abstract class Controller_Template extends Controller {
    * @var  View  page template
    */
   public $template = 'template';
+  public $pjax = NULL;
 
   public $core = NULL;
   public $setting = NULL;
+  public $var = NULL;
 
   public $user = NULL;
   public $city_pretty = NULL;
@@ -29,12 +31,16 @@ abstract class Controller_Template extends Controller {
   public $city_lat = '39.915';
   public $city_radius = 20000000;
   public $pagination = NULL;
-  public $token = '';
+  public $token = NULL;
   public $result = array('status'=>1, 'data'=>NULL);
   public $cache;
+  public $session;
   public $model;
   public $model_city;
   public $model_config;
+
+  public $us_name = 'accounts.user';
+  public $us_name_m = 'accounts.manager';
 
   /**
    * @var  boolean  auto render template
@@ -47,46 +53,48 @@ abstract class Controller_Template extends Controller {
   public function before()
   {
     parent::before();
-
-    $http_x_pjax =  (bool) Arr::get($_SERVER, 'HTTP_X_PJAX', FALSE);
-    if ($http_x_pjax) {
-      $this->auto_render = FALSE;
-    }
     $this->model_city = Model::factory('City');
     $this->model_config = Model::factory('Config');
-
     $this->cache = Cache::instance();
-    $cache_core = $this->cache->get('core', FALSE); 
-    if ($cache_core === FALSE ) {
-      $cache_core = array();
-      $cache_core['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
-      $cache_core['city_area']   = $this->model_city->get_city_pretty($this->city_id, 1, TRUE, 1);
-      $cache_core['city_cache']  = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
-      $cache_core['config']    = (object) $this->model_config->get_all();
-      $cache_core['setting'] = Kohana::$config->load('setting');
-      $cache_core['pagination'] = Kohana::$config->load('pagination.default');
-      $this->cache->set('core', $cache_core);
+    $this->session = Session::instance();
+    $cache = $this->cache->get('core', NULL); 
+    if (empty($cache) == TRUE) {
+      $cache['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
+      $cache['city_cache'] = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
+      $cache['config'] =  $this->model_config->get_all();
+      $cache['setting'] = Kohana::$config->load('setting');
+      $cache['pagination'] = Kohana::$config->load('pagination.default');
+      $this->cache->set('core', $cache);
     }
 
-    $this->city_pretty = $cache_core['city_pretty'];
-    $this->city_area   = $cache_core['city_area'];
-    $this->city_cache  = $cache_core['city_cache'];
-
-    $this->core    =  
-    Model::$core = $cache_core['config'];
-    $this->setting = $cache_core['setting'];
-    $this->pagination = $cache_core['pagination'];
-
-    $this->user = $this->get_user('member.user');
+    $this->city_pretty = $cache['city_pretty'];
+    $this->city_cache = $cache['city_cache'];
+    $this->var = $cache['config'];
+    $this->core = (object) $this->var['core'];
+    $this->setting = $cache['setting'];
+    $this->pagination = $cache['pagination'];
+    // session
+    $this->user = $this->session->get($this->us_name);
+    $this->manager = $this->session->get($this->us_name_m);
     $this->initialize_city();
-
     $this->token = Security::token();
+
+    $cache_city_area = $this->cache->get('cache_city_area', NULL); 
+    if ($cache_city_area == NULL || isset($_GET['city'])) {
+      $cache_city_area = $this->model_city->get_city_pretty($this->city_id, 1, TRUE, 1);
+      $this->cache->set('cache_city_area', $cache_city_area);
+    }
+    $this->city_area = $cache_city_area;
+
+    // pjax
+    $this->pjax = (bool) Arr::get($_SERVER, 'HTTP_X_PJAX', FALSE);
     if ($this->auto_render === TRUE)
     {
       // $this->response->headers('cache-control', 'max-age=3600');
       // Load the template
       $this->template = View::factory($this->template);
       $this->template->bind_global('core', $this->core);
+      $this->template->bind_global('var', $this->var);
       $this->template->bind_global('setting', $this->setting);
       $this->template->bind_global('user', $this->user);
       $this->template->bind_global('city_pretty', $this->city_pretty);
@@ -100,12 +108,6 @@ abstract class Controller_Template extends Controller {
    return $this->user !== NULL; 
   }
 
-  public function get_user($session_name = 'user', $sessionid=NULL)
-  {
-    $user = Session::instance()->get($session_name, NULL);
-    return $user;
-  }
-
   public function initialize_city($id = NULL, $geo = NULL)
   {
     $city_id = (int) Cookie::get('city_id');
@@ -114,7 +116,11 @@ abstract class Controller_Template extends Controller {
       if (isset($geo['lat'])) {
         $geo['city_id'] =$this->city_id;
       }
-      Session::instance()->set('geo', $geo);
+      $this->session->set('geo', $geo);
+    }
+    elseif (isset($_GET['city']) 
+              && isset($this->city_pretty[$_GET['city']])) {
+      $this->city_id = $_GET['city'];
     }
     elseif ($city_id <> 0 
               && isset($this->city_pretty[$city_id])) {
@@ -133,12 +139,12 @@ abstract class Controller_Template extends Controller {
       // do nothing
     }
 
-    $geo = Session::instance()->get('geo');
+    $geo = $this->session->get('geo');
     if ($geo && isset($geo['city_id']) && $this->city_id == $geo['city_id']) {
         $this->city_lng = $geo['lng'];
         $this->city_lat = $geo['lat'];
     }
-    elseif ($geo = Cache::instance()->get($cache_name = 'geo_city_id_'.$this->city_id, FALSE) ) {
+    elseif ($geo = $this->cache->get($cache_name = 'geo_city_id_'.$this->city_id, FALSE) ) {
       $this->city_lng = $geo['lng'];
       $this->city_lat = $geo['lat'];
     }
@@ -173,16 +179,31 @@ abstract class Controller_Template extends Controller {
     }
   }
 
+  // view
+  public function view( & $view) 
+  {
+    if ($this->pjax === TRUE) {
+      if ($view instanceof View) {
+        $this->template = $view;
+      }
+      else {
+        $this->template = View::factory($view);
+      }
+    }
+    else {
+      $this->template->view = $view;
+    }
+  }
+
   /**
    * Assigns the template [View] as the request response.
    */
   public function after()
   {
-    if ($this->request->method() == 'POST') {
-      $this->token = Security::token( TRUE );
-    }
-
     if ($this->auto_render === TRUE) {
+      if ($this->request->method() == 'POST') {
+        $this->token = Security::token( TRUE );
+      }
       $this->template->set_global('city_id', $this->city_id);
       $this->template->set_global('city_lng', $this->city_lng);
       $this->template->set_global('city_lat', $this->city_lat);
@@ -190,7 +211,6 @@ abstract class Controller_Template extends Controller {
       $this->template->set_global('pagination', $this->pagination);
       $this->response->body($this->template->render());
     }
-
     parent::after();
   }
 

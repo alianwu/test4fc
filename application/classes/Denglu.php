@@ -30,7 +30,7 @@ class Denglu
 		'getInvite' => '/api/v3/friends',
 		'getRecommend' => '/api/v3/recommend_user',
 		'sendInvite' => '/api/v3/invite',
-	    'latestComment' => '/api/v4/latest_comment', // 最新评论
+    'latestComment' => '/api/v4/latest_comment', // 最新评论
 		'getComments' => '/api/v4/get_comment_list', // 评论列表，用于数据本地化
 		'getCommentState' => '/api/v4/get_change_comment_ids' // 评论状态列表
 	);

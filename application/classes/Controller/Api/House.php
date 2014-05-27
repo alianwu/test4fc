@@ -5,25 +5,13 @@ class Controller_Api_House extends Controller_Api {
   public function before()
   {
     parent::before();
-    $this->model = Model::factory('House_New');
-  }
-
-  public function action_list()
-  {
-    $page = (int) Arr::get($_GET, 'page', 0);
-    $cid  = (int) Arr::get($_GET, 'cid', 0);
-    if ($cid <> 0 && $page <> 0) {
-      $data = $this->model->get_house_front($cid);
-      if ($data) {
-        $this->result(0, $data->as_array());
-      }
-    }
+    $this->model_house = Model::factory('House');
   }
 
   public function action_search()
   {
     $data = Arr::extract($_GET, array('keyword', 'area', 'price', 'shop', 'underground', 'underground_platform', 'page'));
-    $data = $this->model->get_search_front($this->city_id, $data);
+    $data = $this->model_house->get_search_front($this->city_id, $data);
     if ($data) {
         $this->result(0, $data->as_array());
     }
@@ -46,10 +34,49 @@ class Controller_Api_House extends Controller_Api {
       $city_id = $this->city_id;
     }
     $radius  = (int) Arr::get($_GET, 'radius', 1500000000);
-    $data = $this->model->get_near_front($city_id, $lat, $lng, $radius, $page);
-    $this->result(0);
+    $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius, $page);
     if ($data) {
-      $this->result(NULL, $data->as_array());
+      $this->result(0, $data->as_array());
+    }
+    else {
+      $this->result(1);
+    }
+  }
+
+  public function action_hot()
+  {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $data = $this->model_house->get_hot_front($this->city_id, $page);
+    if ($data) {
+      $this->result(0, $data->as_array());
+    }
+    else {
+      $this->result(1);
+    }
+  }
+  
+  public function action_latest()
+  {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $data = $this->model_house->get_latest_front($this->city_id, $page);
+    if ($data) {
+      $this->result(0, $data->as_array());
+    }
+    else {
+      $this->result(1);
+    }
+  }
+
+
+  public function action_article()
+  {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $this->model_article = Model::factory('Article');
+    $this->model_category = Model::factory('Article_Category');
+    $category_id = $this->core->house_article_id;
+    if ($article = $this->model_article->get_list_front($this->city_id, $category_id, $page)) {
+        $category = $this->model_category->get_list_pretty();
+        $this->result(0, $article->as_array(), array('category'=>$category));
     }
   }
 

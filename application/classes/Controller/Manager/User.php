@@ -10,16 +10,16 @@ class Controller_Manager_User extends Controller_Manager_Template {
 
   public function action_index()
   {
-    $user = $this->model->get_one($this->user['id']); 
+    $data = $this->model->get_one($this->user['id']); 
     $view = View::factory('manager/user');
-    $view->bind('user', $user);
-    $this->template->container = $view;
+    $_POST = $data;
+    $this->view($view);
   }
 
   public function action_update()
   {
     $post = Validation::factory( Arr::extract($_POST + $_FILES, 
-                                  array('id', 'username', 'photo', 'oldpassword', 'password', 'repassword', 'csrf')) );
+          array('id', 'username', 'photo', 'oldpassword', 'password', 'repassword', 'csrf')) );
     $post->rules('id', array(
           array('digit'),
           array('not_empty'),
@@ -30,14 +30,12 @@ class Controller_Manager_User extends Controller_Manager_Template {
           array('min_length', array(':value', 3))
         ))
         ->rules('photo', array(
-          array('Upload::valid'),
-          array('Upload::type', array(':value', array('jpg', 'png'))),
+          array('max_length', array(':value', 100)),
         ))
         ->rules('oldpassword', array(
           array('trim'),
         ))
         ->rules('password', array(
-          array('trim'),
           array('max_length', array(':value', 32)),
           array('min_length', array(':value', 6))
         ))
@@ -51,17 +49,6 @@ class Controller_Manager_User extends Controller_Manager_Template {
 
     if( $post->check() ) {
       $data = $post->data();
-      try {
-        $dir = $this->core['upload_dir'] . DIRECTORY_SEPARATOR;
-        $real_dir = DOCROOT . $dir;
-        $name = uniqid().'.'.strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-        $ret = Upload::save($_FILES['photo'], $name, $real_dir);
-        if ($ret) {
-          $data['photo'] = $dir.$name;
-        }
-      }
-      catch (Kohana_Exception  $e) {
-      }
       $data['id'] = $this->user['id'];
       $ret = $this->model->update_passport($data);
       $this->result($ret);
