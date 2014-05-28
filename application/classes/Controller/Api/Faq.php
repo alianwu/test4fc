@@ -2,35 +2,44 @@
 
 class Controller_Api_Faq extends Controller_Api {
 
+  protected $type;
+  protected $id;
+  protected $sort;
+
   public function before()
   {
     parent::before();
+    $this->id = (int) Arr::get($_GET, 'id', 0);
+    $type = Arr::get($_GET, 'type', FALSE);
+    $this->type = array_search($type, $this->setting['module']);
+    $this->sort = Arr::get($_GET, 'sort', FALSE);
 
-    $this->model = Model::factory('House_Faq');
-    $this->model_detail = Model::factory('House_Faq_Detail');
+    $this->model_faq = Model::factory('Faq');
+    $this->model_detail = Model::factory('Faq_Detail');
   }
 
   public function action_list()
   {
-    $page = (int) Arr::get($_GET, 'page', 1);
-    $hid  = (int) Arr::get($_GET, 'hid', 1);
-    if ($hid <> 0 && $page <> 0) {
-      $data = $this->model->get_list_front($hid, $page);
-      if($data) {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $where = array(
+      'id' => $this->id,
+      'type' => $this->type,
+      'page' => $page,
+    );
+    if ($this->id <> 0 
+      && $this->type
+      && $data = $this->model_faq->get_list_front($this->city_id, $where)) {
         $this->result(0, $data->as_array());
-      }
     }
   }
 
-  public function action_list_detail()
+  public function action_detail()
   {
     $page = (int) Arr::get($_GET, 'page', 1);
-    $fid  = (int) Arr::get($_GET, 'fid', 1);
-    if ($hid <> 0 && $page <> 0) {
-      $data = $this->model_detail->get_list_front($fid, $page);
-      if($data) {
+    $fid = (int) Arr::get($_GET, 'fid', 0);
+    if ($fid <> 0 
+      && $data = $this->model_detail->get_list_front($fid, $page)) {
         $this->result(0, $data->as_array());
-      }
     }
   }
 
@@ -39,26 +48,30 @@ class Controller_Api_Faq extends Controller_Api {
     if ($this->user == NULL) {
       return $this->error_user();
     }
-
-    $post = Validation::factory( Arr::extract($_POST, 
-                                              array('body', 'hid')) );
+    $post = Validation::factory( Arr::extract($_POST, array(
+                'body', 
+                'type', 
+                'id')));
     $post->rules('body', array(
-            array('trim'),
-            array('not_empty'),
-            array('min_length', array(':value', 5)),
-            array('max_length', array(':value', 100))
-        ))
-        ->rules('hid', array(
+          array('trim'),
           array('not_empty'),
-          array('digit'),
-        ));
+          array('min_length', array(':value', 5)),
+          array('max_length', array(':value', 100))))
+        ->rules('id', array(
+          array('not_empty'),
+          array('digit')))
+        ->rules('type', array(
+          array('not_empty')))
+          ;
     if ($post->check()) {
-      $data = $post->data() + $this->user + array('city_id'=>$this->city_id);
-      $ret = $this->model->save_one($data);
-      $this->result($ret);
+      $data = $post->data();
+      $data['type'] = array_search($data['type'], $this->setting['module']);
+      $data += $this->user + array('city_id'=>$this->city_id);
+      $ret = $this->model_faq->save_one($data);
+      $this->result(0);
     }
     else {
-      $this->result(NULL, $post->errors('house/faq'));
+      $this->result(1);
     }
   }
 
@@ -67,26 +80,25 @@ class Controller_Api_Faq extends Controller_Api {
     if ($this->user == NULL) {
       return $this->error_user();
     }
-
-    $post = Validation::factory( Arr::extract($_POST, 
-                                              array('body', 'fid')) );
+    $post = Validation::factory( Arr::extract($_POST, array(
+                'body', 
+                'fid')));
     $post->rules('body', array(
-            array('trim'),
-            array('not_empty'),
-            array('min_length', array(':value', 5)),
-            array('max_length', array(':value', 100))
-        ))
+          array('not_empty'),
+          array('min_length', array(':value', 5)),
+          array('max_length', array(':value', 100))))
         ->rules('fid', array(
           array('not_empty'),
-          array('digit'),
-        ));
+          array('digit')))
+          ;
     if ($post->check()) {
-      $data = $post->data() + $this->user;
+      $data = $post->data();
+      $data += $this->user + array('city_id'=>$this->city_id);
       $ret = $this->model_detail->save_one($data);
-      $this->result($ret);
+      $this->result(0);
     }
     else {
-      $this->result(NULL, $post->errors('house/faq'));
+      $this->result(9);
     }
   }
 

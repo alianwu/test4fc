@@ -3,9 +3,8 @@
 class Model_Member extends Model_Accounts_Core {
 
   public $table = 'member';
-  protected $session_name = 'member.user';
 
-  public function denglu_sigin_or_sigup($data)
+  public function denglu_sigin_or_sigup($data, $session)
   {
 
     $query = DB::query(Database::SELECT, 'SELECT * FROM member 
@@ -34,7 +33,7 @@ class Model_Member extends Model_Accounts_Core {
       $mname = $query->get('name');
     }
 
-    Session::instance()->set($this->session_name, array('_id'=>$mid, '_name'=>$mname));
+    Session::instance()->set($session, array('_id'=>$mid, '_name'=>$mname));
     return TRUE;
   }
 

@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Accounts_Resetpassport extends Controller_Accounts_Template {
+abstract class Controller_Accounts_Resetpassport extends Controller_Accounts_Template {
 
   public function action_index()
   {

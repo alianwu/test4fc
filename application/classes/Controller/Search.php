@@ -7,7 +7,7 @@ class Controller_Search extends Controller_Template {
             $model_setting,
             $model_house,
             
-            $type = array('house_new', 'article');
+            $stype = array('house_new', 'article');
   public function before()
   {
     parent::before();
@@ -18,8 +18,8 @@ class Controller_Search extends Controller_Template {
   }
   public function action_index()
   {
-    $type = Arr::get($_GET, 'type', 'house_new');
-    if (in_array($type, $this->type) == FALSE) {
+    $stype = Arr::get($_GET, 'stype', 'house_new');
+    if (in_array($stype, $this->stype) == FALSE) {
         $type = 'house_new';
     }
 
@@ -29,6 +29,7 @@ class Controller_Search extends Controller_Template {
     $city_group = $this->model_city->get_city_group($this->city_id);
     
     $view =  View::factory('search/search');
+    $view->set('stype', $stype);
     $view->bind_global('city_underground', $underground);
     $view->bind_global('article_category', $category);
     $view->bind_global('initialize_type', $type);
@@ -42,7 +43,7 @@ class Controller_Search extends Controller_Template {
   public function action_map()
   {
     $view =  View::factory('search/map');
-    $this->template->container = $view;
+    $this->view($view);
   }
 
 } // End Home

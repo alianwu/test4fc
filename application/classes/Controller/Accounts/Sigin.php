@@ -1,9 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Accounts_Sigin extends Controller_Accounts_Template {
+abstract class Controller_Accounts_Sigin extends Controller_Accounts_Template {
   
-  public $redirect_url = 'manager_home';
-  public $success = 'sigin/success';
+  public $redirect_url;
+  public $success;
 
   public function action_index()
   {

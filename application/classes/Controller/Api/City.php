@@ -76,12 +76,12 @@ class Controller_Api_City extends Controller_Api {
 
   protected function check_exist_city_name($name)
   {
-    $pretty = array_flip($this->city_pretty);
     if (FALSE !== $id = array_search($name, $this->city_pretty)) {
       return $id;
     }
     $name = UTF8::substr($name, 0, -1);
-    if (FALSE !== $id = array_search($name, $this->city_pretty)) {
+    if ($name 
+        &&FALSE !== $id = array_search($name, $this->city_pretty)) {
       return $id;
     }
     return FALSE;

@@ -67,6 +67,17 @@ class Controller_Api_House extends Controller_Api {
     }
   }
 
+  public function action_list()
+  {
+    $page = max((int) Arr::get($_GET, 'page', 1), 1);
+    $data = $this->model_house->get_list_front($this->city_id, $page);
+    if ($data) {
+      $this->result(0, $data->as_array());
+    }
+    else {
+      $this->result(1);
+    }
+  }
 
   public function action_article()
   {

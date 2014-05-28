@@ -2,8 +2,6 @@
 
 class Controller_User_Denglu extends Controller_Template {
   
-  public $template = 'template';
-  
   public $api; 
   public $model_member; 
 
@@ -21,7 +19,7 @@ class Controller_User_Denglu extends Controller_Template {
     if ($token) {
       try {
         $data = $this->api->getUserInfoByToken($token); 
-        $ret = $this->model_member->denglu_sigin_or_sigup($data);
+        $ret = $this->model_member->denglu_sigin_or_sigup($data, $this->us_name);
         if ($ret) {
           $this->redirect('user_favorite');
         }
@@ -30,7 +28,7 @@ class Controller_User_Denglu extends Controller_Template {
       
       }
     }
-    $this->template->container = '登陆失败！';
+    $this->template->view = '登陆失败！';
   }
 
 } // End Home

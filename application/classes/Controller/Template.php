@@ -96,7 +96,11 @@ abstract class Controller_Template extends Controller {
       $this->template->bind_global('core', $this->core);
       $this->template->bind_global('var', $this->var);
       $this->template->bind_global('setting', $this->setting);
-      $this->template->bind_global('user', $this->user);
+      $user = '';
+      if ($this->user) {
+        $user = json_encode($this->user);
+      }
+      $this->template->bind_global('user', $user);
       $this->template->bind_global('city_pretty', $this->city_pretty);
       $this->template->bind_global('city_cache', $this->city_cache);
       $this->template->bind_global('city_area', $this->city_area);

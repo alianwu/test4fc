@@ -51,8 +51,10 @@ class Model_House extends Model {
   
   public function get_list_front($city_id, $page = 1)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat, attachment_9[0] AS image FROM house 
-                WHERE city_id=:city_id and display=TRUE ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
+                 FROM house 
+                  WHERE city_id=:city_id and display=TRUE 
+                     ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
