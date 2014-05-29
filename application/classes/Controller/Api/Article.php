@@ -7,8 +7,8 @@ class Controller_Api_Article extends Controller_Api {
     parent::before();
 
     $this->model_article = Model::factory('Article');
-    $this->model_faq = Model::factory('Article_Faq');
     $this->model_category = Model::factory('Article_Category');
+    $this->model_faq = Model::factory('Article_Faq');
   }
 
   private  function support($num)
@@ -32,25 +32,20 @@ class Controller_Api_Article extends Controller_Api {
     $this->support(-1);
   }
   
-  public function action_search()
-  {
-    $data = Arr::extract($_GET, array('keyword', 'category', 'day',  'page'));
-    $data = $this->model_article->get_search_front($this->city_id, $data);
-    if ($data) {
-      $data = $data->as_array();
-      $category = $this->model_category->get_list_pretty();
-      $this->result(0, $data, array('category'=>$category));
-    }
-  }
-  
   public function action_list()
   {
-    $id = (int) Arr::get($_GET, 'id', 0);
+    $tag = Arr::get($_GET, 'tag', NULL);
+    $cat = Arr::get($_GET, 'category', NULL);
     $page = max((int) Arr::get($_GET, 'page', 1), 1);
-    if ($id 
-      && $article = $this->model_article->get_list_front($this->city_id, $id, $page)) {
+
+    $where = array(
+      'tag' => $tag,
+      'cat' => $cat,
+      'page' => $page
+    );
+    if ($article = $this->model_article->get_list_front($this->city_id, $where)) {
         $category = $this->model_category->get_list_pretty();
-        $this->result(0, $article, array('category'=>$category));
+        $this->result(0, $article->as_array(), array('category'=>$category));
     }
   }
 
@@ -79,6 +74,49 @@ class Controller_Api_Article extends Controller_Api {
       $error = $post->errors('article');
       print_r($error);
       $this->result(1, $error);
+    }
+  }
+
+
+  function action_live()
+  {
+    $where = array();
+    $lastid =  (int) Arr::get($_GET, 'lastid', 0);
+    $aid =  (int) Arr::get($_GET, 'liveid', 0);
+    $type = Arr::get($_GET, 'type', 'new');
+    $where = array(
+      'lastid' => $lastid,
+      'aid' => $aid,
+      'type' => $type
+    );
+    $data = Model::factory('Article_Live')->get_list_front($this->city_id, $where);
+    if ($data) {
+      $lastid = $data->get('lid');
+      $this->result(0, $data->as_array(), array('lastid'=>$lastid));
+    }
+  }
+
+  function action_live_save()
+  {
+    if ($this->manager == NULL) {
+      return $this->error_user();
+    }
+    $message = Arr::get($_POST, 'message');
+    $aid = Arr::get($_POST, 'aid');
+    $vphoto = Arr::get($_POST, 'vphoto');
+    if ($message || $vphoto) {
+      if ($vphoto) {
+        $message .= '<br /> <img src="'.$vphoto.'" />';
+      }
+      $data = array(
+        'message' => $message,
+        'aid' => $aid,
+        'uid' => $this->manager['id'],
+        'uphoto' => $this->manager['photo'],
+        'uname' => $this->manager['name'],
+      );
+      Model::factory('Article_Live')->save($data);
+      $this->result(0);
     }
   }
 

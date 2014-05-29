@@ -2,7 +2,7 @@
 
 class Model_Article_Tag extends Model_Article_Core_Tag {
 
-  public  $vew = 'house';
   public  $table = 'article_tag';
+  protected $primary_key = 'tid';
 
 }

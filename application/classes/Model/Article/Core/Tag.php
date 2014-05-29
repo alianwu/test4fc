@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Article_Core_Tag extends Kohana_Model {
+class Model_Article_Core_Tag extends Model {
 
   public  $vew;
   public  $table = 'article_tag';

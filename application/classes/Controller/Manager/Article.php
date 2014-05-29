@@ -120,14 +120,9 @@ class Controller_Manager_Article extends Controller_Manager_Template {
     $this->action_index();
   }
 
-  public function action_faq()
+  public function action_live()
   {
-    $aid = Arr::get($_GET, 'aid', 0);
-    $page = Arr::get($_GET, 'page', 1);
-    $faq = $this->model_faq->get_list($aid, $page);
-    $view = View::factory('manager/article/article_faq');
-    $view->bind_global('faq', $faq);
-    $this->template->container->detail = $view;
+    return $this->action_404();
   }
 
 } 

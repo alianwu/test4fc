@@ -96,11 +96,6 @@ abstract class Controller_Template extends Controller {
       $this->template->bind_global('core', $this->core);
       $this->template->bind_global('var', $this->var);
       $this->template->bind_global('setting', $this->setting);
-      $user = '';
-      if ($this->user) {
-        $user = json_encode($this->user);
-      }
-      $this->template->bind_global('user', $user);
       $this->template->bind_global('city_pretty', $this->city_pretty);
       $this->template->bind_global('city_cache', $this->city_cache);
       $this->template->bind_global('city_area', $this->city_area);
@@ -208,6 +203,13 @@ abstract class Controller_Template extends Controller {
       if ($this->request->method() == 'POST') {
         $this->token = Security::token( TRUE );
       }
+      $user = '';
+      if ($this->user) {
+        $user = json_encode($this->user);
+      }
+      $this->template->bind_global('user', $user);
+      $this->template->bind_global('ua', $this->user);
+      $this->template->bind_global('manager', $this->manager);
       $this->template->set_global('city_id', $this->city_id);
       $this->template->set_global('city_lng', $this->city_lng);
       $this->template->set_global('city_lat', $this->city_lat);

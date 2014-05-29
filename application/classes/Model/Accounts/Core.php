@@ -20,7 +20,7 @@ class Model_Accounts_Core extends Kohana_Model {
         'info' => '');
     $auth = Auth::instance();
     $query = DB::query(Database::SELECT, 
-        'SELECT id, username, password, actived  
+        'SELECT * 
           FROM "'. $this->table .'" WHERE email=:email LIMIT 1')
               ->param(':email', $passport['passport'])
               ->execute();
@@ -35,11 +35,13 @@ class Model_Accounts_Core extends Kohana_Model {
     }
     else {
       $ret['error'] = FALSE;
-      Session::instance()->set('accounts.'.$this->view, array('id'    => $query->get('id'), 
-                                              'email' => $query->get('email', $passport['passport']),
-                                              'ip' => Request::$client_ip,
-                                              'name'  => $query->get('username')
-                                       ), (int)$passport['expires']*604800);
+      Session::instance()->set('accounts.'.$this->view, array(
+            'id' => $query->get('id'), 
+            'photo' => $query->get('photo'), 
+            'email' => $query->get('email', $passport['passport']),
+            'ip' => Request::$client_ip,
+            'name'  => $query->get('username')
+        ), (int)$passport['expires']*604800);
     }
     return $ret;
   }

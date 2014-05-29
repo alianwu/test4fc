@@ -12,48 +12,40 @@ class Controller_Article extends Controller_Template {
 
     $this->model_article = Model::factory('Article');
     $this->model_tag = Model::factory('Article_Tag');
-    $this->category = Cache::instance()->get('article_category', FALSE);
-    if ($this->category == FALSE) {
-      $this->category = Model::factory('Article_Category')->get_list_pretty();
-      Cache::instance()->set('article_category', $this->category);
-    }
-    if ($this->auto_render) {
-      $this->template->bind_global('category', $this->category); 
-    }
-  }
-
-  private function _action_list($data)
-  {
-    $view =  View::factory('article/article_list');
-    $view->set_global($data);
-    $this->view($view);
-
+    $this->model_category = Model::factory('Article_Category');
+    $category = $this->model_category->get_list_pretty();
+    $this->template->bind_global('category', $category); 
   }
 
   public function action_index()
   {
-    $article = $this->model_article->get_list_front($this->city_id, $page=1);
-    $this->_action_list(array('article'=>$article,'category_id'=>1, 'type'=>'index')); 
+    $atype = Arr::get($_GET, 'atype', 'index');
+    $view =  View::factory('article/article');
+    switch($atype) {
+      case 'category':
+        $cid = (int) Arr::get($_GET, 'cid');
+        if (isset($category[$cid])) {
+          $view->set_global('cid', $cid);
+        }
+        else {
+          throw Kohana_HTTP_Exception_404();
+        }
+        break;
+      case 'tag':
+        $tid = (int) Arr::get($_GET, 'tid');
+        $tag = $this->model_tag->get($tid);
+        if ($tag) {
+          $view->set_global('tag', $tag);
+        }
+        else {
+          throw Kohana_HTTP_Exception_404();
+        }
+        break;
+    }
+    $view->set_global('atype', $atype);
+    $this->view($view);
   }
 
-  public function action_category()
-  { 
-    $id = (int) $this->request->param('id'); 
-    $article = $this->model_article->get_list_category_front($this->city_id, $id);
-    $this->_action_list(array('article'=>$article, 'category_id'=>$id, 'type'=>'cat')); 
-  }
-
-  public function action_tag()
-  {
-    $id = (int) $this->request->param('id'); 
-    $article = $this->model_article->get_list_tag_front($this->city_id, $id);
-    $tag = $this->model_tag->get_one($id);
-    $this->_action_list(array(
-      'article'=>$article, 
-      'tag'=>$tag, 
-      'tag_id'=>$id, 
-      'type'=>'tag')); 
-  }
 
   public function action_detail()
   {
@@ -61,8 +53,15 @@ class Controller_Article extends Controller_Template {
     if ($id 
       && $article = $this->model_article->get_one_front($id)) {
       $this->model_article->update_hot($id, 'hit');
-      $view = View::factory('article/detail');
+      if ($article->category == $this->core->article_live_id) {
+        $view = View::factory('article/article_live');
+      }
+      else {
+        $view = View::factory('article/article_detail');
+      }
       $view->bind_global('article', $article);
+      $view->set_global('atype', 'category');
+      $view->set_global('cid', $article->category);
       $this->view($view);
     }
     else {

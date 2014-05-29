@@ -66,33 +66,33 @@ class Model_Article_Core extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_search_front($city_id, $data)
+  public function get_list_front($city_id, $where)
   {
-    $page = max((int)$data['page'], 1);
-    $where = 'display= true';
-    $parameters = array();
-    $name = trim($data['keyword']);
-    if ($name) {
-        $where .= ' AND subject like :keyword ';
-        $parameters[':keyword'] = '%'.$name.'%';
+    $sql = 'display= true';
+    $parameters = $parameters_extra = array();
+    if (isset($where['keyword']) && ($keyword = trim($where['keyword']))) {
+        $sql .= ' AND subject like :keyword ';
+        $parameters[':keyword'] = '%'.$keyword.'%';
     }
-
-    $category = (int) $data['category'];
-    if ($category) {
-        $where .= ' AND category=:category ';
-        $parameters[':category'] = $category;
+    if (isset($where['cat']) && $where['cat']) {
+        $sql .= ' AND category=:cat ';
+        $parameters[':cat'] = $where['cat'];
     } 
-
-    $day = (int) $data['day'];
-    if ($day) {
-        $where .= ' AND created > :created ';
-        $start = date('Y-m-d H:i:s', time()-$day*86400);
+    if (isset($where['tag']) && $where['tag']) {
+        $sql .= ' AND tag @> {:tag} ';
+        $parameters_extra[':tag'] = $where['tag'];
+    } 
+    if (isset($where['day']) && $where['day']) {
+        $sql .= ' AND created > :created ';
+        $start = date('Y-m-d H:i:s', time()-$where['day']*86400);
         $parameters[':created'] = $start;
     }
-    
-    $query = DB::query(Database::SELECT, 'SELECT * FROM "'.$this->table.'"
-                WHERE '.$where.' ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
+    $page = $where['page']; 
+    $query = DB::query(Database::SELECT, 'SELECT * FROM :table
+                WHERE '.$sql.' ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
               ->parameters($parameters)
+              ->parameters_extra($parameters_extra)
+              ->param_extra(':table', $this->table)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->as_object()
@@ -100,33 +100,7 @@ class Model_Article_Core extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_list_front($city_id, $category_id, $page = 1)
-  {
-    $query = DB::query(Database::SELECT, 
-                'SELECT * FROM :table
-                  WHERE category=:category AND display=true 
-                    ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
-              ->param(':num', $this->pagination->default['items_per_page'])
-              ->param(':start', ($page-1) * $this->pagination->default['items_per_page'])
-              ->param(':category', $category_id)
-              ->param_extra(':table', $this->table)
-              ->as_object()
-              ->execute();
-    return $query->count() == 0 ?  NULL : $query;
-  }
 
-  public function get_list_tag_front($city_id, $tag_id, $page = 1)
-  {
-    $query = DB::query(Database::SELECT, 
-                'SELECT * FROM "'. $this->table .'" 
-                  WHERE tag @> \'{:tag}\' AND display=true ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
-              ->param(':num', $this->pagination->default['items_per_page'])
-              ->param(':start', ($page-1) * $this->pagination->default['items_per_page'])
-              ->param(':tag', $tag_id)
-              ->as_object()
-              ->execute();
-    return $query->count() == 0 ?  NULL : $query;
-  }
 
   public function get_list(array $where = NULL, $page = 1)
   {
