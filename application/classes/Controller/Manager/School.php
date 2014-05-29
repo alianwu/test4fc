@@ -92,6 +92,7 @@ class Controller_Manager_School extends Controller_Manager_Template {
       $post->rules($k, $v);
     }
     if($post->check()) {
+      $data = $post->data();
       $ret = $this->model->save_one($data);
       $view = View::factory('manager/school/school_editor_success')->set('ret', $ret);
       return $this->view($view);

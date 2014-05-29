@@ -82,7 +82,7 @@ class Controller_Manager_Company extends Controller_Manager_Template {
       $post->rules($k, $v);
     }
     if($post->check()) {
-      $data = Security::xss_clean($post->data());
+      $data = $post->data();
       $ret = $this->model->save_one($data);
       $view = View::factory('manager/company/company_editor_success')->set('ret', $ret);
       return $this->view($view);
