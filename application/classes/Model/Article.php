@@ -2,7 +2,7 @@
 
 class Model_Article extends Model_Article_Core {
 
-  public  $vew = 'house';
   public  $table = 'article';
+  public  $primary_key = 'aid';
 
 }

@@ -85,7 +85,9 @@ class Controller_Api_House extends Controller_Api {
     $this->model_article = Model::factory('Article');
     $this->model_category = Model::factory('Article_Category');
     $category_id = $this->core->house_article_id;
-    if ($article = $this->model_article->get_list_front($this->city_id, $category_id, $page)) {
+    $where['page'] = $page;
+    $where['cat'] = $category_id;
+    if ($article = $this->model_article->get_list_front($this->city_id, $where)) {
         $category = $this->model_category->get_list_pretty();
         $this->result(0, $article->as_array(), array('category'=>$category));
     }
