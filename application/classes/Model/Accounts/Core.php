@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Accounts_Core extends Kohana_Model {
+class Model_Accounts_Core extends Model {
 
   public  $vew;
   public  $table = 'user';
@@ -145,14 +145,6 @@ class Model_Accounts_Core extends Kohana_Model {
   {
     $query = DB::query(Database::UPDATE, 
                 'UPDATE  "'. $this->table .'" SET actived = not actived WHERE id=:id ')
-                ->param(':id', $id)
-                ->execute();
-    return $query;
-  }
-   public function delete($id)
-  {
-    $query = DB::query(Database::DELETE, 
-                'DELETE "'. $this->table .'"  WHERE id=:id ')
                 ->param(':id', $id)
                 ->execute();
     return $query;
