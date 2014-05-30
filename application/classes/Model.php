@@ -137,7 +137,7 @@ class Model extends Kohana_Model {
   
   public function delete($id)
   {
-    $query = DB::query(Database::DELETE, 'DELETE :table  
+    $query = DB::query(Database::DELETE, 'DELETE FROM ":table"  
                   WHERE :primary_key = :id')
               ->param_extra(':table', $this->table)
               ->param_extra(':primary_key', $this->primary_key);
