@@ -36,11 +36,13 @@ class Controller_Api_Article extends Controller_Api {
   {
     $tag = Arr::get($_GET, 'tag', NULL);
     $cat = Arr::get($_GET, 'category', NULL);
+    $day = Arr::get($_GET, 'day', NULL);
     $page = max((int) Arr::get($_GET, 'page', 1), 1);
 
     $where = array(
       'tag' => $tag,
       'cat' => $cat,
+      'day' => $day,
       'page' => $page
     );
     if ($article = $this->model_article->get_list_front($this->city_id, $where)) {

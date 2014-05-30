@@ -12,7 +12,7 @@ class Controller_Faq extends Controller_Template {
     parent::before();
     $this->id = (int) Arr::get($_GET, 'id', 0);
     $this->type = Arr::get($_GET, 'type', FALSE);
-    $this->sort = Arr::get($_GET, 'sort', 'latest');
+    $this->sort = Arr::get($_GET, 'sort', 'hot');
     $this->model_faq = Model::factory('Faq');
     $this->model_faq_detail = Model::factory('Faq_Detail');
   }

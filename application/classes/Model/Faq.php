@@ -30,11 +30,19 @@ class Model_Faq extends Model {
 
   public function get_list_front($city_id, $where)
   {
+    $desc = 'hot';
+    if ($where['sort'] == 'hot') {
+      $desc = 'count';
+    }
+    elseif ($where['sort'] == 'latest') {
+      $desc = 'created';
+    }
     $query = DB::query(Database::SELECT, 'SELECT *
               FROM :table
-                WHERE id=:id AND display=true 
-                  ORDER BY created DESC, fid DESC LIMIT :num OFFSET :start ')
+                WHERE id=:id AND type=:type AND display=true 
+                  ORDER BY :sort DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param_extra(':table', $this->table)
+              ->param_extra(':sort', $desc)
               ->param(':id', $where['id'])
               ->param(':type', $where['type'])
               ->param(':city_id', $city_id)

@@ -24,6 +24,7 @@ class Controller_Api_Faq extends Controller_Api {
     $where = array(
       'id' => $this->id,
       'type' => $this->type,
+      'sort' => $this->sort,
       'page' => $page,
     );
     if ($this->id <> 0 

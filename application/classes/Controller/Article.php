@@ -13,8 +13,8 @@ class Controller_Article extends Controller_Template {
     $this->model_article = Model::factory('Article');
     $this->model_tag = Model::factory('Article_Tag');
     $this->model_category = Model::factory('Article_Category');
-    $category = $this->model_category->get_list_pretty();
-    $this->template->bind_global('category', $category); 
+    $this->category = $this->model_category->get_list_pretty();
+    $this->template->bind_global('category', $this->category); 
   }
 
   public function action_index()
@@ -24,7 +24,7 @@ class Controller_Article extends Controller_Template {
     switch($atype) {
       case 'category':
         $cid = (int) Arr::get($_GET, 'cid');
-        if (isset($category[$cid])) {
+        if (isset($this->category[$cid])) {
           $view->set_global('cid', $cid);
         }
         else {
