@@ -106,7 +106,10 @@ class Controller_Api_Article extends Controller_Api {
     $vphoto = Arr::get($_POST, 'vphoto');
     if ($message || $vphoto) {
       if ($vphoto) {
-        $message .= '<br /> <img src="'.$vphoto.'" />';
+        $ipath = Upload::base64_save_get_path($vphoto);
+        if ($ipath) {
+          $message .= '<br /> <img src="'.$ipath.'" />';
+        }
       }
       $data = array(
         'message' => $message,

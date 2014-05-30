@@ -52,14 +52,7 @@ class Upload extends  Kohana_Upload {
     if (empty($file['name'])) {
       return NULL;
     }
-    $cache = Cache::instance()->get('core');
-    $dir =  Arr::path($cache, 'config.core.upload_dir');
-    $static_url =  Arr::path($cache, 'config.core.static_url');
-    $safe_dir = $dir .date("Y/m") . DIRECTORY_SEPARATOR;;
-    $real_dir = $safe_dir;
-    if (is_dir($real_dir) == FALSE) {
-      mkdir($real_dir, 0755, TRUE);
-    }
+    list($static_url, $safe_dir, $real_dir) = self::initialize_dir();
     $dirname = $real_dir;
 		$pi = pathinfo($file['name']);
 		$name = $pi['filename'];
@@ -73,4 +66,33 @@ class Upload extends  Kohana_Upload {
     return NULL;
   }
 
+  public static function initialize_dir()
+  {
+    $cache = Cache::instance()->get('core');
+    $dir =  Arr::path($cache, 'config.core.upload_dir');
+    $static_url =  Arr::path($cache, 'config.core.static_url');
+    $safe_dir = $dir .date("Y/m") . DIRECTORY_SEPARATOR;;
+    $real_dir = $safe_dir;
+    if (is_dir($real_dir) == FALSE) {
+      mkdir($real_dir, 0755, TRUE);
+    }
+    return array($static_url, $safe_dir, $real_dir);
+  }
+
+  static function base64_save_get_path($base64) 
+  {
+    if (empty($base64) || mb_strlen($base64) < 50) {
+      return FALSE;
+    }
+    $base64 = base64_decode(substr($base64, 22));
+    if ($base64) {
+      list($static_url, $safe_dir, $real_dir) = self::initialize_dir();
+      $filename = uniqid().'.png';
+      $ret =file_put_contents($real_dir.$filename, $base64);
+      if ($ret) {
+        return $static_url.$safe_dir.$filename;
+      }
+    }
+    return FALSE;
+  }
 }
