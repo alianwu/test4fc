@@ -49,20 +49,6 @@ class Model_House extends Model {
     return $ret;
   } 
   
-  public function get_list_front($city_id, $page = 1)
-  {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
-                 FROM house 
-                  WHERE city_id=:city_id and display=TRUE 
-                     ORDER BY weight DESC, hid DESC LIMIT :num OFFSET :start ')
-              ->param(':city_id', $city_id)
-              ->param(':num', $this->pagination->default['items_per_page'])
-              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
-              ->as_object()
-              ->execute();
-    return $query->count() == 0 ? NULL : $query;
-  }
-  
   public function get_hot_front($city_id, $page)
   {
     $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
@@ -89,53 +75,50 @@ class Model_House extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_search_front($city_id, $data)
+  public function get_list_front($city_id, $where)
   {
-    $page = max((int)$data['page'], 1);
+    $page = max((int)$where['page'], 1);
     $parameters = array(':city_id'=>$city_id);
-    $where = 'city_id=:city_id';
-    $name = trim($data['keyword']);
-    if ($name) {
-        $where .= ' AND (name like :keyword OR address like :keyword)';
-        $parameters[':keyword'] = '%'.$name.'%';
+    $sql = 'city_id=:city_id';
+    if (isset($where['keyword']) && $where['keyword']) {
+        $sql .= ' AND (hid =:hid  OR name like :keyword OR address like :keyword)';
+        $parameters[':keyword'] = '%'.$where['keyword'].'%';
+        $parameters[':hid'] = (int )$where['keyword'];
     }
-    $area = (int) $data['area']; 
-    if ($area) {
-      $where .= ' AND city_area=:city_area';
-      $parameters[':city_area'] = $area;
+    if (isset($where['area']) && $where['area']) {
+      $sql .= ' AND city_area=:city_area';
+      $parameters[':city_area'] =  $where['area'];
     }
-    $shop = (int) $data['shop']; 
-    if ($shop) {
-      $where .= ' AND city_area_shop=:city_area_shop';
-      $parameters[':city_area_shop'] = $shop;
+    if (isset($where['shop']) && $where['shop']) {
+      $sql .= ' AND city_area_shop=:city_area_shop';
+      $parameters[':city_area_shop'] = $where['shop'];
     }
-    $price = explode('-', $data['price']);
-    if ($price) {
+    if (isset($where['price']) && $where['price']) {
+      $price = explode('-', $data['price']);
       $min_price = isset($price[0])? (int) $price[0]:0;
       if ($min_price) {
-        $where .= ' AND price >:min_price';
+        $sql .= ' AND price >:min_price';
         $parameters[':min_price'] = $min_price;
       }
       $max_price = isset($price[1])? (int) $price[1]:0;
-
       if ( $max_price && $max_price > $min_price) {
-        $where .= ' AND price < :max_price';
+        $sql .= ' AND price < :max_price';
         $parameters[':max_price'] = $max_price;
       }
     }
-    $underground = (int) $data['underground'];
-    if ($underground) {
-      $where .= ' AND underground=:underground';
-      $parameters[':underground'] = $underground;
+    if (isset($where['underground']) && $where['underground']) {
+      $sql .= ' AND underground=:underground';
+      $parameters[':underground'] = $where['underground'];
     }
-    $underground_platform = (int) $data['underground_platform'];
-    if ($underground_platform) {
-      $where .= ' AND underground_platform=:underground_platform';
-      $parameters[':underground_platform'] = $underground_platform;
+    if (isset($where['underground_platform']) && $where['underground_platform']) {
+      $sql .= ' AND underground_platform=:underground_platform';
+      $parameters[':underground_platform'] =$where['underground_platform'];
     }
 
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
-                WHERE '.$where.' AND display=TRUE ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
+    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
+              FROM house 
+                WHERE '.$sql.' AND display=TRUE 
+                  ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
               ->parameters($parameters)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))

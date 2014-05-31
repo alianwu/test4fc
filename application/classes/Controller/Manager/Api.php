@@ -57,5 +57,26 @@ class Controller_Manager_Api extends Controller_Api {
       $this->result(FALSE, NULL, $error);
     }
   }
+
+  function action_rel()
+  {
+    $rel = Arr::get($_GET, 'rel');
+    $rel_id = Arr::get($_GET, 'rel_id');
+    $where['page'] = 1;
+    $where['keyword'] = $rel_id;
+    $data = array();
+    switch($rel) {
+      case 1:
+        $ret = Model::factory('House')->get_list_front($this->city_id, $where);
+        if ($ret) {
+          foreach($ret->as_array() as $v) {
+            $data[] = array($v->hid, $v->name);
+          }
+        }
+        break;
+    }
+
+    $this->result(0, $data);
+  }
   
 } // End API

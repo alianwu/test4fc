@@ -66,6 +66,12 @@ class Controller_Manager_Article extends Controller_Manager_Template {
             array('digit'),
             array('not_empty'),
           ),
+      'rel' => array(
+            array('digit'),
+          ),
+      'rel_id' => array(
+            array('digit'),
+          ),
       'source' => array(
             array('max_length', array(':value', 10)),
           ),
