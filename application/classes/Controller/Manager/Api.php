@@ -74,9 +74,16 @@ class Controller_Manager_Api extends Controller_Api {
           }
         }
         break;
+      case 2:
+        break;
+      case 4:
+        break;
+      case 8:
+        break;
     }
-
-    $this->result(0, $data);
+    if ($data) {
+      $this->result(0, $data);
+    }
   }
   
 } // End API
