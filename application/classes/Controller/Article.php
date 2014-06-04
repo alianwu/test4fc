@@ -56,8 +56,16 @@ class Controller_Article extends Controller_Template {
       if ($article->category == $this->core->article_live_id) {
         $view = View::factory('article/article_live');
       }
+      elseif ($article->category == $this->core->article_picture_id) {
+        $view = View::factory('article/article_picture');
+        $article->image = json_decode($article->image);
+      }
       else {
         $view = View::factory('article/article_detail');
+      }
+      if ($article->rel 
+        && $article->rel_id) {
+         
       }
       $view->bind_global('article', $article);
       $view->set_global('atype', 'category');

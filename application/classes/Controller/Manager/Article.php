@@ -26,11 +26,22 @@ class Controller_Manager_Article extends Controller_Manager_Template {
 
   public function action_editor()
   { 
-    $id = (int) Arr::get($_GET, 'id', 0);
-    if ($id) {
-      $data = $this->model->get_one($id);
-      if($data) {
-        $_POST = $data;
+    if ($this->request->method() == HTTP_Request::GET) {
+      if($id = (int) Arr::get($_GET, 'id', 0)) {
+        $data = $this->model->get_one($id);
+        if($data) {
+          $_POST = $data;
+          $_POST['image'] = json_decode($_POST['image'], TRUE); 
+        }
+      }
+    }
+    else {
+      if ($ih = Arr::get($_POST, 'image_history', FALSE)) {
+        foreach ($ih as $k => $v) {
+          $_POST['image'][] =  array(
+            'src'=>$v, 
+            'alt'=>Arr::path($_POST, 'image_desc.'.$k));
+        }
       }
     }
     $category = $this->model_category->get_list_pretty();
@@ -80,6 +91,16 @@ class Controller_Manager_Article extends Controller_Manager_Template {
           ),
       'relation' => array(
             array('max_length', array(':value', 1000)),
+          ),
+      'image_history' => array(
+            array('is_array'),
+          ),
+      'image_desc' => array(
+            array('is_array'),
+          ),
+      'type' => array(
+            array('digit'),
+            array('not_empty'),
           ),
       'weight' => array(
             array('digit'),

@@ -138,7 +138,6 @@ class Model_Article_Core extends Model {
 
   public function save_one($data)
   {
-    unset($data['csrf']);
 
     $aid = $data['aid'];
     $tag = '{';
@@ -172,7 +171,22 @@ class Model_Article_Core extends Model {
     }
     $relation .= '}';
 
-
+    $image = array();
+    if (empty($data['image_history']) === FALSE) {
+      foreach($data['image_history'] as $k=>$v) {
+        $image[] = array(
+          'src'=>$v, 
+          'alt'=> Arr::path($data, 'image_desc.'.$k) 
+        );
+      }
+    }
+    if ($image) {
+      $data['image'] = json_encode($image);
+      $data['image_default'] = $image[0]['src'];
+    }
+    unset($data['csrf'], 
+      $data['image_history'], 
+      $data['image_desc']);
     $parameters = array();
     $upset = '';
     foreach($data as $k=>$v)  {

@@ -31,6 +31,11 @@ return array(
       1024 => 'setting',
       2048 => 'system',
     ),
+  'module_article' => array(
+      1 => '房源',
+      4 => '学区',
+      8 => '公司'
+    ),
   'house' => array(
     0 => '不限', 
     1 => '新房', 

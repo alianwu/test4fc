@@ -11,9 +11,21 @@ class Controller_Api_Article extends Controller_Api {
     $this->model_faq = Model::factory('Article_Faq');
   }
 
-  private  function support($num)
+  public function action_support()
   {
     $aid = (int) Arr::get($_POST, 'aid', 0);
+    $action =  Arr::get($_POST, 'act');
+    switch($action) {
+      case 'article-up':
+        $num = 1;
+        break;
+      case 'article-down':
+        $num = -1;
+        break;
+      default:
+        $num = 0;
+        return ;
+    }
     if ($aid) {
       $ret = $this->model_article->support_one($aid, $num); 
       if ($ret) {
@@ -22,16 +34,6 @@ class Controller_Api_Article extends Controller_Api {
     }
   }
 
-  public function action_up()
-  {
-    $this->support(1);
-  }
-
-  public function action_down()
-  {
-    $this->support(-1);
-  }
-  
   public function action_list()
   {
     $tag = Arr::get($_GET, 'tag', NULL);
@@ -51,7 +53,7 @@ class Controller_Api_Article extends Controller_Api {
     }
   }
 
-  public function action_faq_save()
+  public function action_kill()
   {
     if ($this->user == NULL) {
       return $this->error_user();
@@ -74,7 +76,6 @@ class Controller_Api_Article extends Controller_Api {
     }
     else {
       $error = $post->errors('article');
-      print_r($error);
       $this->result(1, $error);
     }
   }

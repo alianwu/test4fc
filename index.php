@@ -62,8 +62,8 @@ require APPPATH.'bootstrap'.EXT;
  * Execute the main request. A source of the URI can be passed, eg: $_SERVER['PATH_INFO'].
  * If no source is specified, the URI will be automatically detected.
  */
- 
-$http_cache = HTTP_Cache::factory(Cache::instance());
+$cache = Cache::instance();
+$http_cache = HTTP_Cache::factory($cache);
 echo Request::factory(TRUE, array('cache'=>$http_cache), FALSE)
       ->execute()
       ->send_headers(TRUE)

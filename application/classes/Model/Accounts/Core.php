@@ -38,6 +38,7 @@ class Model_Accounts_Core extends Model {
       Session::instance()->set('accounts.'.$this->view, array(
             'id' => $query->get('id'), 
             'photo' => $query->get('photo'), 
+            'auth' => json_decode($query->get('auth'), true), 
             'email' => $query->get('email', $passport['passport']),
             'ip' => Request::$client_ip,
             'name'  => $query->get('username')

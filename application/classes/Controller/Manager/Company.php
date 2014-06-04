@@ -24,6 +24,16 @@ class Controller_Manager_Company extends Controller_Manager_Template {
         $data = $this->model->get($id, FALSE);
         if($data) {
           $_POST = $data;
+          $_POST['image'] = json_decode($_POST['image'], TRUE); 
+        }
+      }
+    }
+    else {
+      if ($ih = Arr::get($_POST, 'image_history', FALSE)) {
+        foreach ($ih as $k => $v) {
+          $_POST['image'][] =  array(
+            'src'=>$v, 
+            'alt'=>Arr::path($_POST, 'image_desc.'.$k));
         }
       }
     }
