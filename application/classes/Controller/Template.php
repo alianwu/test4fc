@@ -61,7 +61,7 @@ abstract class Controller_Template extends Controller {
     if (empty($cache) == TRUE) {
       $cache['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
       $cache['city_cache'] = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
-      $cache['config'] =  $this->model_config->get_all();
+      $cache['config'] = $this->model_config->get_all();
       $cache['setting'] = Kohana::$config->load('setting');
       $cache['pagination'] = Kohana::$config->load('pagination.default');
       $this->cache->set('core', $cache);

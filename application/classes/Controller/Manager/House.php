@@ -217,8 +217,11 @@ class Controller_Manager_House extends Controller_Manager_Template {
 
   public function action_display()
   {
-    $ret = $this->model->display_one($this->hid);
-    $this->result($ret);
+    $id = (int) Arr::get($_GET, 'id', 0);
+    if ($id) {
+      $ret = $this->model->update_hot($id, 'display');
+      $this->result($ret?TRUE:FALSE);
+    }
     $this->action_index();
   }
 
