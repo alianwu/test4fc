@@ -53,10 +53,10 @@ class Controller_Article extends Controller_Template {
     if ($id 
       && $article = $this->model_article->get_one_front($id)) {
       $this->model_article->update_hot($id, 'hit');
-      if ($article->category == $this->core->article_live_id) {
+      if ($article->type == 2) {
         $view = View::factory('article/article_live');
       }
-      elseif ($article->category == $this->core->article_picture_id) {
+      elseif ($article->type == 1) {
         $view = View::factory('article/article_picture');
         $article->image = json_decode($article->image);
       }
