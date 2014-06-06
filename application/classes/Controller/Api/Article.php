@@ -53,11 +53,12 @@ class Controller_Api_Article extends Controller_Api {
     }
   }
 
-  public function action_kill()
+  public function action_faq()
   {
     if ($this->user == NULL) {
       return $this->error_user();
     }
+    $_POST = Security::xss_clean($_POST);
     $post = Validation::factory( Arr::extract($_POST, 
                                               array('body', 'aid')) );
     $post->rules('body', array(
@@ -68,9 +69,13 @@ class Controller_Api_Article extends Controller_Api {
         ->rules('aid', array(
           array('not_empty'),
           array('digit'),
-        ));
+        )
+      );
     if ($post->check()) {
-      $data = $post->data();
+      $data = $post->data() + $this->user + array(
+        'city_id'=> $this->city_id,
+        'mid'=> $this->user['_id'],
+      );
       $ret = $this->model_faq->save_one($data);
       $this->result((bool)$ret);
     }

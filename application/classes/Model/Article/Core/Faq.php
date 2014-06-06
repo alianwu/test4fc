@@ -1,16 +1,12 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Model_Article_Core_Faq extends Kohana_Model {
+class Model_Article_Core_Faq extends Model {
 
   public  $vew;
   public  $table = 'article_faq';
 
-  function __construct()   
-  {
-    $this->pagination = Kohana::$config->load('pagination');
-  }
 
-  public  function get_list($aid, $page = 1) 
+  public  function get_detail($aid, $page = 1) 
   {
     $ret = array('total'=>0, 'data' => array());
     $query = DB::query(Database::SELECT, 'SELECT count(*) FROM "'.$this->table.'" WHERE aid=:aid')
@@ -30,6 +26,30 @@ class Model_Article_Core_Faq extends Kohana_Model {
     return $ret;
   }
 
+  public function get_more($where=NULL, $start=0, $limit=30, $is_object = TRUE) 
+  {
+    $sql = array('true');
+    $params = array();
+    if ($where !== NULL) {
+      foreach($where as $k=>$v) {
+        $pkey = ':'.$k;
+        $params[$pkey] = $v;
+        $sql[] = 'T1.'.$k.'='.$pkey;
+      }
+    }
+    $query = DB::query(Database::SELECT, 
+                'SELECT T1.*, T2.subject FROM :table AS T1 LEFT JOIN :table_article AS T2 ON T1.aid=T2.aid 
+                    WHERE '. (implode(' AND ', $sql)) .' LIMIT '.$limit.' OFFSET '.$start)
+              ->param_extra(':table', $this->table)
+              ->param_extra(':table_article', 'article')
+              ->param(':start', $start)
+              ->param(':limit', $limit)
+              ->parameters($params);
+    if ($is_object === TRUE) {
+      $query = $query->as_object();
+    }
+    return $query->execute();
+  }
 
   public function delete_one($fid)
   {
@@ -50,10 +70,11 @@ class Model_Article_Core_Faq extends Kohana_Model {
 
   public function save_one($data)
   {
-    $data['body'] = Security::xss_clean($data['body']);
     $query = DB::query(Database::SELECT, 
-                'INSERT INTO "'. $this->table .'" (aid, body) VALUES (:aid, :body) RETURNING fid')
+                'INSERT INTO "'. $this->table .'" (aid, mid, body, city_id) VALUES (:aid, :mid, :body, :city_id) RETURNING fid')
               ->param(':aid', $data['aid'])
+              ->param(':mid', $data['mid'])
+              ->param(':city_id', $data['city_id'])
               ->param(':body', $data['body'])
               ->execute();
     Model::factory('Article')->update_faq($data['aid']);

@@ -48,7 +48,7 @@ abstract class Controller_Manager_Template extends Controller_Template {
     $id = (int) Arr::get($_GET, 'id', 0);
     if ($id) {
       $ret = $this->model->update_hot($id, 'display');
-      $this->result($ret);
+      $this->result($ret?TRUE:FALSE);
     }
     $this->action_index();
   }

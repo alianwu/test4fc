@@ -61,18 +61,18 @@ class Model extends Kohana_Model {
 
   public function get_more($where =NULL, $start = 0, $limit = 20, $is_object = TRUE)
   {
-    $wsql = array('true');
+    $sql = array('true');
     $params = array();
     if ($where !== NULL) {
       foreach($where as $k=>$v) {
         $pkey = ':'.$k;
         $params[$pkey] = $v;
-        $wsql[] = $k.'='.$pkey;
+        $sql[] = $k.'='.$pkey;
       }
     }
     $query = DB::query(Database::SELECT, 
                 'SELECT * FROM :table 
-                    WHERE '. (implode(' AND ', $wsql)) .' LIMIT '.$limit.' OFFSET '.$start)
+                    WHERE '. (implode(' AND ', $sql)) .' LIMIT '.$limit.' OFFSET '.$start)
               ->param_extra(':table', $this->table)
               ->param(':start', $start)
               ->param(':limit', $limit)

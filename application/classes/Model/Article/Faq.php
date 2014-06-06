@@ -2,7 +2,7 @@
 
 class Model_Article_Faq extends Model_Article_Core_Faq {
 
-  public  $vew = 'house';
+  public  $vew = 'article';
   public  $table = 'article_faq';
 
 }
