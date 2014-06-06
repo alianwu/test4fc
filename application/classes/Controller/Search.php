@@ -16,11 +16,12 @@ class Controller_Search extends Controller_Template {
     $this->model_house = Model::factory('House');
     // $this->response->headers('cache-control', 'max-age=5');
   }
+
   public function action_index()
   {
     $stype = Arr::get($_GET, 'stype', 'house_new');
     if (in_array($stype, $this->stype) == FALSE) {
-        $type = 'house_new';
+        $stype = 'house_new';
     }
 
     $underground = $this->model_city->get_city_pretty($this->city_id, 2);
@@ -35,7 +36,18 @@ class Controller_Search extends Controller_Template {
     $view->bind_global('initialize_type', $type);
     $view->bind_global('hotsearch', $hotsearch);
     $view->bind_global('city_group', $city_group);
+    $this->view($view);
+  }
 
+  public function action_result()
+  {
+    $stype = Arr::get($_GET, 'stype', 'house_new');
+    if (in_array($stype, $this->stype) == FALSE) {
+        $stype = 'house_new';
+    }
+
+    $view =  View::factory('search/search_result');
+    $view->set('stype', $stype);
     $this->view($view);
   }
 

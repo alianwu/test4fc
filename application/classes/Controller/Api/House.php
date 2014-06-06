@@ -11,7 +11,7 @@ class Controller_Api_House extends Controller_Api {
   public function action_search()
   {
     $data = Arr::extract($_GET, array('keyword', 'area', 'price', 'shop', 'underground', 'underground_platform', 'page'));
-    $data = $this->model_house->get_search_front($this->city_id, $data);
+    $data = $this->model_house->get_list_front($this->city_id, $data);
     if ($data) {
         $this->result(0, $data->as_array());
     }
