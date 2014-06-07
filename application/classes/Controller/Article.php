@@ -50,8 +50,14 @@ class Controller_Article extends Controller_Template {
   public function action_detail()
   {
     $id = (int) $this->request->param('id'); 
+    if ($this->manager) {
+      $article = $this->model_article->get_one($id, TRUE);
+    }
+    else {
+      $article = $this->model_article->get_one_front($id);
+    }
     if ($id 
-      && $article = $this->model_article->get_one_front($id)) {
+      && $article) {
       $this->model_article->update_hot($id, 'hit');
       if ($article->type == 2) {
         $view = View::factory('article/article_live');

@@ -25,12 +25,15 @@ class Model_Article_Core extends Model {
     return $query->count() == 0 ?  NULL : $query->current();
   }
 
-  public  function get_one($aid) 
+  public  function get_one($aid, $is_object = FALSE) 
   {
     $query = DB::query(Database::SELECT, 
                 'SELECT * FROM "'. $this->table .'" WHERE aid=:aid LIMIT 1')
-              ->param(':aid', (int) $aid)
-              ->execute();
+                ->param(':aid', (int) $aid);
+    if ($is_object === TRUE) {
+      $query->as_object();
+    }
+    $query = $query->execute();
     return $query->count() == 0 ?  NULL : $query->current();
   }
   

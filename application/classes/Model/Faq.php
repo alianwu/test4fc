@@ -65,11 +65,12 @@ class Model_Faq extends Model {
     return $query->count() == 0 ? NULL : $query;
   } 
   
-  public function get_one_front($fid)
+  public function get_one_front($city_id, $fid)
   {
     $query = DB::query(Database::SELECT, 'SELECT * FROM faq
-                WHERE fid=:fid and display=true LIMIT 1 ')
+                WHERE fid=:fid AND city_id=:city_id AND display=true LIMIT 1 ')
               ->param(':fid', $fid)
+              ->param(':city_id', $city_id)
               ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL: $query->current();
@@ -86,12 +87,18 @@ class Model_Faq extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
+  public function update_count($fid)
+  {
+    return DB::query(Database::UPDATE, 'UPDATE faq SET count = count+1 where fid=:fid')
+              ->param(':fid', $fid)
+              ->execute();
+  }
 
   public function save_one($data)
   {
     $query = DB::query(Database::INSERT, 'INSERT INTO 
-              faq (id, body, mid, uname)
-                VALUES (:id, :body, :mid, :uname) ')
+              faq (id, city_id, body, mid, mname, type)
+                VALUES (:id, :city_id, :body, :mid, :mname, :type) ')
               ->param(':id', $data['id'])
               ->param(':city_id', $data['city_id'])
               ->param(':type', $data['type'])

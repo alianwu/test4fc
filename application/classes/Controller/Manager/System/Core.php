@@ -2,6 +2,8 @@
 
 class Controller_Manager_System_Core extends Controller_Manager_Template {
   
+  protected  $cache_key_config = 'core';
+
   public function before()
   {
     parent::before();
@@ -34,6 +36,7 @@ class Controller_Manager_System_Core extends Controller_Manager_Template {
       unset($data['csrf']);
       $this->model_config->update_one($data);
       $this->result(0);
+      $this->cache->delete($this->cache_key_config);
     }
     else {
       $error = $post->errors('system/core');

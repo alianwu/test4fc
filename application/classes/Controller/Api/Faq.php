@@ -49,6 +49,14 @@ class Controller_Api_Faq extends Controller_Api {
     if ($this->user == NULL) {
       return $this->error_user();
     }
+    $faq_status = $this->var['faq']['on'];
+    $faq_start = $this->var['faq']['time_start'];
+    $faq_end = $this->var['faq']['time_end'];
+    $now_h =  date('H');
+    if ($faq_status == 0 or ($now_h < $faq_start or $now_h > $faq_end)) {
+      return $this->result(1, '系统问答关闭');
+    }
+
     $post = Validation::factory( Arr::extract($_POST, array(
                 'body', 
                 'type', 
@@ -65,7 +73,12 @@ class Controller_Api_Faq extends Controller_Api {
           array('not_empty')))
           ;
     if ($post->check()) {
-      $data = $post->data();
+      $data = Security::xss_clean($post->data());
+      if ($this->var['faq']['blackword']) {
+        $bws = explode("\n", $this->var['faq']['blackword']);
+        $data['body'] =  str_replace($bws, ' ', $data['body']);
+      }
+      $data['city_id'] = $this->city_id;
       $data['type'] = array_search($data['type'], $this->setting['module']);
       $data += $this->user + array('city_id'=>$this->city_id);
       $ret = $this->model_faq->save_one($data);

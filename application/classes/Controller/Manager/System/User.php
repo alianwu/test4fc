@@ -31,7 +31,7 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
   {
     $id = (int) Arr::get($_GET, 'id');
     $user = $this->model->get_one($id);
-    $user['auth'] = (array) json_decode($user['auth'], true);
+    $user['auth'] = json_decode($user['auth'], true);
     if ($user) {
       $view = View::factory('manager/user/auth');
       $view->bind('user', $user);
@@ -60,7 +60,7 @@ class Controller_Manager_System_User extends Controller_Manager_Template {
     if( $post->check() ) {
       $data = $post->data();
       $ret = $this->model->auth_update($data);
-      $this->result($ret);
+      $this->result((bool) $ret);
     }
     else {
       $error = $post->errors('user/auth');

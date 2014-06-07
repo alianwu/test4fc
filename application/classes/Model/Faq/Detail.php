@@ -66,14 +66,16 @@ class Model_Faq_Detail extends Model {
 
   public function save_one($data)
   {
-    $query = DB::query(Database::INSERT, 'INSERT INTO faq_detail (fid, body, mid, mname, created)
-                VALUES (:fid, :body, :mid, :mname, now()) ')
+    $query = DB::query(Database::INSERT, 'INSERT INTO faq_detail (fid, city_id, body, mid, mname, created)
+                VALUES (:fid, :city_id, :body, :mid, :mname, now()) ')
               ->param(':fid', $data['fid'])
               ->param(':city_id', $data['city_id'])
               ->param(':body', $data['body'])
+              ->param(':city_id', $data['city_id'])
               ->param(':mid', $data['_id'])
               ->param(':mname', $data['_name'])
               ->execute();
+    Model::factory('Faq')->update_count($data['fid']);
     return $query?TRUE:FALSE;
   }
 

@@ -17,7 +17,7 @@ class Controller_Api extends Controller_Template {
 
   public function error_user($error = NULL)
   {
-    $this->result(1, $error == NULL ? 'please login': $error);
+    $this->result(1, $error == NULL ? '请登录': $error);
   }
   
   public function after()

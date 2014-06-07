@@ -154,13 +154,16 @@ class Model_Accounts_Core extends Model {
   public function auth_update($data)
   {
     $id = $data['id'];
+    $user = Session::instance()->get('accounts.manager');
+    $user['auth'] = $data['auth'];
+    Session::instance()->set('accounts.manager', $user);
     $auth = json_encode($data['auth']); 
     $query = DB::query(Database::UPDATE, 
                   'UPDATE  "'. $this->table .'" SET auth = :auth WHERE id=:id')
                 ->param(':id', $id)
                 ->param(':auth', $auth)
                 ->execute();
-    return $query?true:false;
+    return $query;
   }
 
 }

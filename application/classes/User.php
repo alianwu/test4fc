@@ -2,9 +2,9 @@
 
 class User {
 
-	public static function auth($user, $code)
+	public static function auth($user, $path)
   {
-    return false;
+    return isset($user['auth']) && Arr::path($user['auth'], $path, FALSE);
   }
 
 }
