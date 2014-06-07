@@ -65,7 +65,13 @@ class Controller_Article extends Controller_Template {
       }
       if ($article->rel 
         && $article->rel_id) {
-         
+        switch($article->rel) {
+          case 1:
+            $data = Model::factory('House')->get_one($article->rel_id);
+            $view->bind('rel', $data);
+            $view->set('rel_name', 'house');
+            break;
+        } 
       }
       $view->bind_global('article', $article);
       $view->set_global('atype', 'category');

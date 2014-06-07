@@ -51,7 +51,7 @@ class Model_House extends Model {
   
   public function get_hot_front($city_id, $page)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat
                 FROM house 
                 WHERE city_id=:city_id AND hot=1 AND display=TRUE ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
@@ -64,7 +64,7 @@ class Model_House extends Model {
 
   public function get_latest_front($city_id, $page)
   {
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat 
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat 
                 FROM house 
                 WHERE city_id=:city_id AND display=TRUE AND house_date_sale > current_date AND house_date_sale-90 < current_date ORDER BY stick DESC,  house_date_sale ASC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
@@ -115,7 +115,7 @@ class Model_House extends Model {
       $parameters[':underground_platform'] =$where['underground_platform'];
     }
 
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, gps[0] AS lng, gps[1] AS lat
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat
               FROM house 
                 WHERE '.$sql.' AND display=TRUE 
                   ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
@@ -133,7 +133,6 @@ class Model_House extends Model {
     $sql = "SELECT t.*
               , ST_Distance(ST_Transform(ST_GeomFromText('".$point."',4326),26986), ST_Transform(geo, 26986)) as distance
               , t.gps[0] AS lng, t.gps[1] AS lat
-              , t.phone[0] AS phone_1
               FROM house AS t
                 WHERE city_id=:city_id AND ST_DWithin(
                   ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
@@ -151,7 +150,7 @@ class Model_House extends Model {
   public function get_list_favorite(array $ids, $page=1)
   {
     $hid = implode(',', $ids);
-    $query = DB::query(Database::SELECT, 'SELECT *, phone[1] AS phone_1, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
+    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
                 WHERE hid in ('.$hid.') AND display=TRUE')
               ->execute();
     return $query->count() == 0 ? NULL : $query;
@@ -221,8 +220,20 @@ class Model_House extends Model {
     $data['gps'] = $data['lng'] . ',' . $data['lat']; 
     $data['geo'] = 'ST_GeomFromText(\'POINT('.$data['lng'].' '.$data['lat'].')\', 4326)';
     $data['display'] = (bool) $data['display']; 
-    $data['phone'] = '{'. $data['phone'] .'}'; 
     $data['updated'] = 'now()';
+
+    $phone = $data['phone'];
+    $ptmp = array();
+    if ($phone) {
+      $phone_list = explode("\n", $phone);
+      foreach($phone_list as $v) {
+        $pone = explode(' ', $v);
+        if (count($pone) > 1) {
+          $ptmp[] = array('n'=>$pone[1], 'c'=>$pone[0]);
+        }
+      }
+    }
+    $data['phone'] = json_encode($ptmp);
 
     $schools = $image = array();
     if (empty($data['image_history']) === FALSE) {
@@ -256,6 +267,8 @@ class Model_House extends Model {
     unset($data['csrf'], 
       $data['lng'], 
       $data['lat'], 
+      $phone,
+      $ptmp,
       $data['image_history'], 
       $data['image_desc'], 
       $data['image_group'], 

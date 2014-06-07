@@ -38,6 +38,14 @@ class Controller_Manager_House extends Controller_Manager_Template {
         $_POST = $data;
         $_POST['schools'] = json_decode($_POST['schools'], TRUE); 
         $_POST['image'] = json_decode($_POST['image'], TRUE); 
+        $_POST['phone'] = json_decode($_POST['phone'], TRUE); 
+        if ($_POST['phone']) {
+          $pstr = '';
+          foreach($_POST['phone'] as $v) {
+            $pstr .= $v['c'].' '.$v['n']."\n"; 
+          }
+          $_POST['phone'] = $pstr; 
+        }
       }
     }
     else {
