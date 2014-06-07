@@ -34,7 +34,13 @@ class Controller_Api_House extends Controller_Api {
       $city_id = $this->city_id;
     }
     $radius  = (int) Arr::get($_GET, 'radius', 1500000000);
-    $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius, $page);
+    $geo = $this->session->get('geo');
+    if ($geo) {
+      $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius, $page);
+    }
+    else {
+      $data = $this->model_house->get_list_front($this->city_id, $page);
+    }
     if ($data) {
       $this->result(0, $data->as_array());
     }
@@ -76,6 +82,21 @@ class Controller_Api_House extends Controller_Api {
     }
     else {
       $this->result(1);
+    }
+  }
+
+  public function action_favorite()
+  {
+    $ids = Arr::get($_GET, 'fv', FALSE);
+    if ($ids) {
+      $ids = explode('|', $ids);
+      $data = $this->model_house->get_list_favorite($this->city_id, $ids);
+      if ($data) {
+        $this->result(0, $data->as_array());
+      }
+      else {
+        $this->result(1);
+      }
     }
   }
 

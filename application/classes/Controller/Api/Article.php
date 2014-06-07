@@ -131,4 +131,20 @@ class Controller_Api_Article extends Controller_Api {
     }
   }
 
+  public function action_favorite()
+  {
+    $ids = Arr::get($_GET, 'fv', FALSE);
+    if ($ids) {
+      $ids = explode('|', $ids);
+      $data = $this->model_article->get_list_favorite($this->city_id, $ids);
+      if ($data) {
+        $category = $this->model_category->get_list_pretty();
+        $this->result(0, $data->as_array(), array('category'=>$category));
+      }
+      else {
+        $this->result(1);
+      }
+    }
+  }
+
 } // End API

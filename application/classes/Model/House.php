@@ -147,11 +147,13 @@ class Model_House extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
   
-  public function get_list_favorite(array $ids, $page=1)
+  public function get_list_favorite($city_id, array $ids, $page=1)
   {
+    $ids = Arr::map('intval', $ids);
     $hid = implode(',', $ids);
-    $query = DB::query(Database::SELECT, 'SELECT *, geo[0] AS lng, geo[1] AS lat, attachment_9[1] AS image  FROM house 
-                WHERE hid in ('.$hid.') AND display=TRUE')
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat  FROM house 
+                WHERE hid in (:hid) AND display=TRUE')
+              ->param_extra(':hid', $hid)
               ->execute();
     return $query->count() == 0 ? NULL : $query;
   }

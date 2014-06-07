@@ -59,11 +59,13 @@ class Model_Article_Core extends Model {
     return $query->count() == 0 ?  NULL : $query->current();
   }
 
-  public function get_list_favorite(array $ids, $page=1)
+  public function get_list_favorite($city_id, array $ids, $page=1)
   {
+    $ids = Arr::map('intval', $ids);
     $aid = implode(',', $ids);
     $query = DB::query(Database::SELECT, 'SELECT * FROM "'.$this->table.'" 
-                WHERE aid in ('.$aid.') AND display=TRUE')
+                WHERE aid in (:aid) AND display=TRUE')
+              ->param_extra(':aid', $aid)
               ->as_object()
               ->execute();
     return $query->count() == 0 ? NULL : $query;
