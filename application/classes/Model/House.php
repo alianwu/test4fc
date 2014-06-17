@@ -249,7 +249,8 @@ class Model_House extends Model {
     }
     if ($image) {
       $data['image'] = json_encode($image);
-      $data['image_default'] = $image[0]['src'];
+      $default = Upload::image_cache($image[0]['src']);
+      $data['image_default'] = $default;
     }
 
     if (empty($data['school']) === FALSE) {
@@ -270,6 +271,7 @@ class Model_House extends Model {
       $data['lng'], 
       $data['lat'], 
       $phone,
+      $image,
       $ptmp,
       $data['image_history'], 
       $data['image_desc'], 

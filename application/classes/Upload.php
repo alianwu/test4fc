@@ -79,6 +79,34 @@ class Upload extends  Kohana_Upload {
     return array($static_url, $safe_dir, $real_dir);
   }
 
+  static function image_cache($url, $width=200, $height=200)
+  {
+    list($static_url, $safe_dir, $real_dir) = self::initialize_dir();
+    $filename = 'cache_'.md5($url);
+    if (is_file($url)) {
+      $image_path = $url;
+      $image = Image::factory($image_path);
+      $iext = File::ext_by_mime(File::mime($image_path));
+      $image->resize($width, $height);
+      $image->save($real_dir.$filename.'.'.$iext);
+      return $static_url.$safe_dir.$filename.'.'.$iext;
+    }
+    elseif(Valid::url($url) == TRUE) {
+      $data = file_get_contents($url); 
+      if ($data) {
+        $image_path = $real_dir.$filename;
+        file_put_contents($image_path, $data);
+        $image = Image::factory($image_path);
+        $image->resize($width, $height);
+        $iext = File::ext_by_mime($image->mime);
+        $image->save($real_dir.$filename.'.'.$iext);
+        unlink($real_dir.$filename);
+        return $static_url.$safe_dir.$filename.'.'.$iext;
+      }
+    }
+    return NULL;
+  }
+
   static function base64_save_get_path($base64) 
   {
     if (empty($base64) || mb_strlen($base64) < 50) {
