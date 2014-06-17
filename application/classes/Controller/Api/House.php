@@ -39,7 +39,8 @@ class Controller_Api_House extends Controller_Api {
       $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius, $page);
     }
     else {
-      $data = $this->model_house->get_list_front($this->city_id, $page);
+      $where = array('page'=>$page);
+      $data = $this->model_house->get_list_front($this->city_id, $where);
     }
     if ($data) {
       $this->result(0, $data->as_array());
