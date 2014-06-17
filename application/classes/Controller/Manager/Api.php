@@ -44,11 +44,17 @@ class Controller_Manager_Api extends Controller_Api {
       switch ($id) {
         case 1:
           $path = Upload::save_get_path($data['qqfile']);
-          $result = array('success' => TRUE, 'uuid' => $data['qquuid'], 'uploadName' => $path);
+          $result = array(
+            'success' => TRUE, 
+            'uuid' => $data['qquuid'], 
+            'uploadName' => $path[0],
+            'fullpath' => $path[1]);
         break;
         case 2:
           $path = Upload::save_get_path($data['imgFile']);
-          $result = array('error' => 0, 'url' => $path);
+          $result = array(
+            'error' => 0, 
+            'url' => $path[0]);
       }
       $this->result(TRUE, NULL, $result);
     }

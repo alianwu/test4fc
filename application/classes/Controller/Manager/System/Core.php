@@ -26,6 +26,9 @@ class Controller_Manager_System_Core extends Controller_Manager_Template {
         ->rules('faq', array(
           array('not_empty'),
         ))
+        ->rules('image', array(
+          array('not_empty'),
+        ))
         ->rules('csrf', array(
           array('not_empty'),
           array('Security::check'),

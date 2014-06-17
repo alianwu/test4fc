@@ -52,7 +52,7 @@ class Upload extends  Kohana_Upload {
     if (empty($file['name'])) {
       return NULL;
     }
-    list($static_url, $safe_dir, $real_dir) = self::initialize_dir();
+    list($static_url, $safe_dir, $real_dir, $water) = self::initialize_dir();
     $dirname = $real_dir;
 		$pi = pathinfo($file['name']);
 		$name = $pi['filename'];
@@ -61,7 +61,13 @@ class Upload extends  Kohana_Upload {
     //$filename = $file['name'].'_'.uniqid().'.'.File::ext_by_mime($file['type']);
     $fullpath = self::save($file, $filename, $dirname);
     if ($fullpath) {
-      return $static_url.$safe_dir.basename($fullpath);
+      if ($water) {
+        $image = Image::factory($fullpath);
+        $watermark = Image::factory($water);
+        $image->watermark($watermark, TRUE, TRUE);
+        $image->save();
+      }
+      return array($static_url.$safe_dir.basename($fullpath), $fullpath);
     }
     return NULL;
   }
@@ -70,18 +76,19 @@ class Upload extends  Kohana_Upload {
   {
     $cache = Cache::instance()->get('core');
     $dir =  Arr::path($cache, 'config.core.upload_dir');
+    $water =  Arr::path($cache, 'config.image.path');
     $static_url =  Arr::path($cache, 'config.core.static_url');
     $safe_dir = $dir .date("Y/m") . DIRECTORY_SEPARATOR;;
     $real_dir = $safe_dir;
     if (is_dir($real_dir) == FALSE) {
       mkdir($real_dir, 0755, TRUE);
     }
-    return array($static_url, $safe_dir, $real_dir);
+    return array($static_url, $safe_dir, $real_dir, $water);
   }
 
   static function image_cache($url, $width=200, $height=200)
   {
-    list($static_url, $safe_dir, $real_dir) = self::initialize_dir();
+    list($static_url, $safe_dir, $real_dir, $water) = self::initialize_dir();
     $filename = 'cache_'.md5($url);
     if (is_file($url)) {
       $image_path = $url;
