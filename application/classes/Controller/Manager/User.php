@@ -66,6 +66,7 @@ class Controller_Manager_User extends Controller_Manager_Template {
   public function action_logout()
   {
     Model::factory('User')->logout();
+    Cookie::delete('auth');
     $this->redirect('manager_sigin');
   }
 } 

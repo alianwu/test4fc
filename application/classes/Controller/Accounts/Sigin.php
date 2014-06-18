@@ -35,7 +35,6 @@ abstract class Controller_Accounts_Sigin extends Controller_Accounts_Template {
           array('not_empty')
         ))
         ->rules('expires', array(
-          array('trim'),
           array('is_numeric')
         ))
         ->rules('redirect', array(

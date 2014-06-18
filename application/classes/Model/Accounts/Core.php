@@ -35,14 +35,18 @@ class Model_Accounts_Core extends Model {
     }
     else {
       $ret['error'] = FALSE;
-      Session::instance()->set('accounts.'.$this->view, array(
+      $session = array(
             'id' => $query->get('id'), 
             'photo' => $query->get('photo'), 
             'auth' => json_decode($query->get('auth'), true), 
             'email' => $query->get('email', $passport['passport']),
             'ip' => Request::$client_ip,
-            'name'  => $query->get('username')
-        ), (int)$passport['expires']*604800);
+            'name'  => $query->get('username'));
+      if (isset($passport['expires'])) {
+        $seconds = (int)$passport['expires']*604800;
+        Cookie::set('auth', json_encode($session), $seconds);
+      }
+      Session::instance()->set('accounts.'.$this->view, $session);
     }
     return $ret;
   }

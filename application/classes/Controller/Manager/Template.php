@@ -24,8 +24,14 @@ abstract class Controller_Manager_Template extends Controller_Template {
   {
     parent::before();
     $this->user = $this->manager;
-    if ($this->user === NULL 
-          or $this->user['ip'] <> Request::$client_ip) {
+    if ($this->user === NULL ) {
+      $auth = Cookie::get('auth');
+      $user = json_decode($auth, TRUE);
+      if ($user) {
+        $this->user = $user;
+      }
+    }
+    if( $this->user === NULL or $this->user['ip'] <> Request::$client_ip) {
       if ($this->pjax == TRUE) {
         echo '页面已失效';
         exit;
