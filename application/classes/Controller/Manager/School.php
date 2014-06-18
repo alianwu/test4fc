@@ -51,6 +51,9 @@ class Controller_Manager_School extends Controller_Manager_Template {
       'city_area' => array(
             array('digit'),
             array('not_empty')),
+      'city_area_shop' => array(
+            array('digit'),
+            array('not_empty')),
       'name' => array(
             array('not_empty'),
             array('min_length', array(':value', 3)),
