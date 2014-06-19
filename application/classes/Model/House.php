@@ -354,7 +354,13 @@ class Model_House extends Model {
       if($query) {
         $rcode = $data['hid'];
      }
+    }
 
+    if ($schools && $rcode) {
+      $house = array((int)$rcode => $data['name']);
+      foreach($schools as $v) {
+        Model::factory('School')->house_update($v['s'], $house); 
+      }
     }
     return $rcode;
   }

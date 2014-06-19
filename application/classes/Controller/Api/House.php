@@ -33,7 +33,7 @@ class Controller_Api_House extends Controller_Api {
     if ($city_id == 0) {
       $city_id = $this->city_id;
     }
-    $radius  = (int) Arr::get($_GET, 'radius', 1500000000);
+    $radius  = (int) Arr::get($_GET, 'radius', $this->city_radius);
     $geo = $this->session->get('geo');
     if ($geo) {
       $data = $this->model_house->get_near_front($city_id, $lat, $lng, $radius, $page);

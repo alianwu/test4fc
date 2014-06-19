@@ -29,7 +29,7 @@ abstract class Controller_Template extends Controller {
   public $city_id = 1;
   public $city_lng = '116.404';
   public $city_lat = '39.915';
-  public $city_radius = 20000000;
+  public $city_radius = 2000;
   public $pagination = NULL;
   public $token = NULL;
   public $result = array('status'=>1, 'data'=>NULL);
@@ -66,7 +66,6 @@ abstract class Controller_Template extends Controller {
       $cache['pagination'] = Kohana::$config->load('pagination.default');
       $this->cache->set('core', $cache);
     }
-
     $this->city_pretty = $cache['city_pretty'];
     $this->city_cache = $cache['city_cache'];
     $this->var = $cache['config'];

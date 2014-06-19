@@ -132,6 +132,131 @@ class Model_School extends Model {
     $ret['data'] = $query;
     return $ret; 
   }
+  
+  public function get_near_front($cid, $lat, $lng, $radius, $page=1)
+  {
+    $point = 'POINT('.$lng.' '.$lat.')';
+    $sql = "SELECT t.*
+              , ST_Distance(ST_Transform(ST_GeomFromText('".$point."',4326),26986), ST_Transform(geo, 26986)) as distance
+              , t.gps[0] AS lng, t.gps[1] AS lat
+              FROM school AS t
+                WHERE city_id=:city_id AND ST_DWithin(
+                  ST_Transform(ST_GeomFromText('".$point."',4326),26986), 
+                  ST_Transform(t.geo, 26986), 
+                  ".$radius.") AND display=TRUE
+                ORDER BY ST_Distance(ST_GeomFromText('".$point."',4326), t.geo) LIMIT :num OFFSET :start";
+    $query = DB::query(Database::SELECT, $sql)
+              ->param(':city_id', $cid)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  public function get_hot_front($city_id, $page)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat
+                FROM school 
+                  WHERE city_id=:city_id AND hot=1 AND display=TRUE 
+                    ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
+              ->param(':city_id', $city_id)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  public function get_latest_front($city_id, $page)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat 
+                FROM school 
+                WHERE city_id=:city_id AND display=TRUE ORDER BY created DESC, weight DESC LIMIT :num OFFSET :start ')
+              ->param(':city_id', $city_id)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  public function get_list_front($city_id, $where)
+  {
+    $page = max((int)$where['page'], 1);
+    $parameters = array(':city_id'=>$city_id);
+    $sql = 'city_id=:city_id';
+    if (isset($where['keyword']) && $where['keyword']) {
+        $sql .= ' AND (sid =:hid  OR name like :keyword OR address like :keyword)';
+        $parameters[':keyword'] = '%'.$where['keyword'].'%';
+        $parameters[':hid'] = (int )$where['keyword'];
+    }
+    if (isset($where['area']) && $where['area']) {
+      $sql .= ' AND city_area=:city_area';
+      $parameters[':city_area'] =  $where['area'];
+    }
+    if (isset($where['shop']) && $where['shop']) {
+      $sql .= ' AND city_area_shop=:city_area_shop';
+      $parameters[':city_area_shop'] = $where['shop'];
+    }
+
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat
+              FROM school 
+                WHERE '.$sql.' AND display=TRUE 
+                  ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
+              ->parameters($parameters)
+              ->param(':num', $this->pagination->default['items_per_page'])
+              ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
+              ->as_object()
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  
+  public function get_list_favorite($city_id, array $ids, $page=1)
+  {
+    $ids = Arr::map('intval', $ids);
+    $sid = implode(',', $ids);
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat  FROM school 
+                WHERE sid in (:sid) AND display=TRUE')
+              ->param_extra(':sid', $sid)
+              ->execute();
+    return $query->count() == 0 ? NULL : $query;
+  }
+
+  public function get_one($id)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT 
+      *, gps[0] AS lng, gps[1] AS lat
+                FROM school WHERE sid=:sid')
+              ->param(':sid', $id)
+              ->as_object()
+              ->execute();
+    return $query->count() == 0? NULL: $query->current();
+  }
+
+  public function get_one_front($id)
+  {
+    $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat FROM school WHERE sid=:sid AND display = TRUE LIMIT 1')
+              ->param(':sid', $id)
+              ->as_object()
+              ->execute();
+    return $query->count() == 0? NULL : $query->current();
+  }
+
+  public function house_update($id, $house)
+  {
+    $school  = $this->get($id);
+    if ($school) {
+      $school_house_old = json_decode($school->house, TRUE);
+      if ($school_house_old) {
+        $school_house = array_merge($school_house_old, $house);
+      }
+      else {
+        $school_house = $house;
+      }
+      $this->update($id, array('house'=> json_encode($school_house) ));
+    }
+  }
 
 }
 
