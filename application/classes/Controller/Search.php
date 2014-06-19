@@ -7,7 +7,7 @@ class Controller_Search extends Controller_Template {
             $model_setting,
             $model_house,
             
-            $stype = array('house_new', 'article');
+            $type = array('house_new', 'article', 'school', 'company');
   public function before()
   {
     parent::before();
@@ -41,13 +41,13 @@ class Controller_Search extends Controller_Template {
 
   public function action_result()
   {
-    $stype = Arr::get($_GET, 'stype', 'house_new');
-    if (in_array($stype, $this->stype) == FALSE) {
-        $stype = 'house_new';
+    $type = Arr::get($_GET, 'type', 'house_new');
+    if (in_array($type, $this->type) == FALSE) {
+        $type = 'house_new';
     }
 
     $view =  View::factory('search/search_result');
-    $view->set('stype', $stype);
+    $view->set('type', $type);
     $this->view($view);
   }
 

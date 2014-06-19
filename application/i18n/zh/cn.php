@@ -33,4 +33,9 @@ return array(
   'repassword' => '确认密码',
   'captcha' => '验证码',
 
+  'school' => '学区',
+  'company' => '公司',
+  'house_new' => '新房',
+  'house_rent' => '租售',
+  'article' => '资讯',
 );

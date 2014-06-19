@@ -41,6 +41,15 @@ class Controller_House extends Controller_Template {
     if ($data == NULL) {
       throw new Kohana_HTTP_Exception_404();
     }
+
+    $where = array(
+        'page' => 1,
+        'shop' => $data->city_area_shop
+      );
+    $school = Model::factory('School')->get_list_front($this->city_id, $where);
+    $company = Model::factory('Company')->get_list_front($this->city_id, $where);
+    $data->school_near = $school->as_array();
+    $data->company_near = $company->as_array();
     $this->model_house->update_hot($hid, 'hit');
     $view =  View::factory('house/house_detail');
     $data->schools = json_decode($data->schools);
