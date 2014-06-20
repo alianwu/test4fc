@@ -25,9 +25,11 @@ class Controller_User_Qq extends Controller_Template {
   public function action_login()
   {
     $qc = new QC();
+    $ak =  $qc->qq_callback();
     $openid = $qc->get_openid();
+    $qc = new QC($ak, $openid);
     $user = $qc->get_user_info();
-    if ($openid) {
+    if ($openid && $user) {
       $user = Security::xss_clean($user);
       $this->model_member->qq_login($openid, $user, $this->us_name);
       $this->redirect('user_favorite');

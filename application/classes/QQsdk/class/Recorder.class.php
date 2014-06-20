@@ -22,7 +22,7 @@ class Recorder{
             $this->error->showError("20001");
         }
         $session = Session::instance()->get('QC_userData', NULL);
-        if($session === NULL){
+        if($session == NULL){
             self::$data = array();
         }else{
             self::$data = $session;
