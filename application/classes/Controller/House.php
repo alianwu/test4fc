@@ -47,9 +47,13 @@ class Controller_House extends Controller_Template {
         'shop' => $data->city_area_shop
       );
     $school = Model::factory('School')->get_list_front($this->city_id, $where);
+    if ($school) {
+      $data->school_near = $school->as_array();
+    }
     $company = Model::factory('Company')->get_list_front($this->city_id, $where);
-    $data->school_near = $school->as_array();
-    $data->company_near = $company->as_array();
+    if ($company) {
+      $data->company_near = $company->as_array();
+    }
     $this->model_house->update_hot($hid, 'hit');
     $view =  View::factory('house/house_detail');
     $data->schools = json_decode($data->schools);
