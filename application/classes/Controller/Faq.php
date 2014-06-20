@@ -23,6 +23,12 @@ class Controller_Faq extends Controller_Template {
       case 'house':
         $this->model = Model::factory('House');
         break;
+      case 'school':
+        $this->model = Model::factory('School');
+        break;
+      case 'company':
+        $this->model = Model::factory('Company');
+        break;
       default:
         throw new Kohana_HTTP_Exception_404();
     }

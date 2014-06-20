@@ -54,6 +54,8 @@ class Controller_Manager_Company extends Controller_Manager_Template {
             array('not_empty'),
             array('min_length', array(':value', 3)),
             array('max_length', array(':value', 100))),
+      'hot' => array(
+            array('digit')),
       'city_area' => array(
             array('digit'),
             array('not_empty')),
