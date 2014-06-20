@@ -158,14 +158,16 @@ class Model_House extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_one($hid)
+  public function get_one($hid, $is_object = TRUE)
   {
     $query = DB::query(Database::SELECT, 'SELECT 
       *, gps[0] AS lng, gps[1] AS lat
-                FROM house WHERE hid=:hid')
-              ->param(':hid', $hid)
-              ->as_object()
-              ->execute();
+                FROM house WHERE hid=:hid LIMIT 1')
+              ->param(':hid', $hid);
+    if ($is_object === TRUE) {
+      $query->as_object();
+    }
+    $query = $query->execute();
     return $query->count() == 0? NULL: $query->current();
   }
 

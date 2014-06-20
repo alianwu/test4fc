@@ -33,7 +33,7 @@ class Controller_Manager_House extends Controller_Manager_Template {
   { 
     if ($this->request->method() == HTTP_Request::GET) {
       $id = (int) Arr::get($_GET, 'id', 0);
-      $data = $this->model->get($id, FALSE);
+      $data = $this->model->get_one($id, FALSE);
       if ($data) {
         $_POST = $data;
         $_POST['schools'] = json_decode($_POST['schools'], TRUE); 
