@@ -29,6 +29,7 @@ abstract class Controller_Manager_Template extends Controller_Template {
       $user = json_decode($auth, TRUE);
       if ($user) {
         $this->user = $user;
+        $this->session->set($this->us_name_m, $user);
       }
     }
     if( $this->user === NULL or $this->user['ip'] <> Request::$client_ip) {

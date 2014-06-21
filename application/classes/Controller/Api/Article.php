@@ -90,6 +90,7 @@ class Controller_Api_Article extends Controller_Api {
   {
     $where = array();
     $lastid =  (int) Arr::get($_GET, 'lastid', 0);
+
     $aid =  (int) Arr::get($_GET, 'liveid', 0);
     $type = Arr::get($_GET, 'type', 'new');
     $where = array(
@@ -110,14 +111,15 @@ class Controller_Api_Article extends Controller_Api {
       return $this->error_user();
     }
     $message = Arr::get($_POST, 'message');
+    $vphoto = '';
     $aid = Arr::get($_POST, 'aid');
-    $vphoto = Arr::get($_POST, 'vphoto');
+    if (isset($_FILES['imgFile'])) {
+      $path = Upload::save_get_path($_FILES['imgFile']);
+      $vphoto = HTML::image($path[0]);
+    }
     if ($message || $vphoto) {
       if ($vphoto) {
-        $ipath = Upload::base64_save_get_path($vphoto);
-        if ($ipath) {
-          $message .= '<br /> <img src="'.$ipath.'" />';
-        }
+        $message .= '<br />' . $vphoto;
       }
       $data = array(
         'message' => $message,
