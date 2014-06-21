@@ -65,7 +65,8 @@ class Controller_Api_House extends Controller_Api {
   public function action_latest()
   {
     $page = max((int) Arr::get($_GET, 'page', 1), 1);
-    $data = $this->model_house->get_latest_front($this->city_id, $page);
+    $where = array('page'=>$page);
+    $data = $this->model_house->get_latest_front($this->city_id, $where);
     if ($data) {
       $this->result(0, $data->as_array());
     }
@@ -76,8 +77,8 @@ class Controller_Api_House extends Controller_Api {
 
   public function action_list()
   {
-    $page = max((int) Arr::get($_GET, 'page', 1), 1);
-    $data = $this->model_house->get_list_front($this->city_id, $page);
+    $where = Arr::extract($_GET, array('keyword', 'area', 'price', 'shop', 'underground', 'underground_platform', 'page'));
+    $data = $this->model_house->get_list_front($this->city_id, $where);
     if ($data) {
       $this->result(0, $data->as_array());
     }

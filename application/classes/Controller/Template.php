@@ -24,6 +24,7 @@ abstract class Controller_Template extends Controller {
   public $city_pretty = NULL;
   public $city_cache = NULL;
   public $city_area = NULL;
+  public $city_group = NULL;
 
   // default: Beijing
   public $city_id = 1;
@@ -61,6 +62,7 @@ abstract class Controller_Template extends Controller {
     if (empty($cache) == TRUE) {
       $cache['city_pretty'] = $this->model_city->get_city_pretty(0, 1, TRUE, 1);
       $cache['city_cache'] = $this->model_city->get_city_pretty(NULL, NULL, TRUE, 1);
+      $cache['city_group'] = $this->model_city->get_city_group($this->city_id);
       $cache['config'] = $this->model_config->get_all();
       $cache['setting'] = Kohana::$config->load('setting');
       $cache['pagination'] = Kohana::$config->load('pagination.default');
@@ -68,6 +70,7 @@ abstract class Controller_Template extends Controller {
     }
     $this->city_pretty = $cache['city_pretty'];
     $this->city_cache = $cache['city_cache'];
+    $this->city_group = $cache['city_group'];
     $this->var = $cache['config'];
     $this->core = (object) $this->var['core'];
     $this->setting = $cache['setting'];
@@ -97,6 +100,7 @@ abstract class Controller_Template extends Controller {
       $this->template->bind_global('setting', $this->setting);
       $this->template->bind_global('city_pretty', $this->city_pretty);
       $this->template->bind_global('city_cache', $this->city_cache);
+      $this->template->bind_global('city_group', $this->city_group);
       $this->template->bind_global('city_area', $this->city_area);
     }
   }

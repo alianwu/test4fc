@@ -19,9 +19,9 @@ class Controller_Search extends Controller_Template {
 
   public function action_index()
   {
-    $stype = Arr::get($_GET, 'stype', 'house_new');
-    if (in_array($stype, $this->stype) == FALSE) {
-        $stype = 'house_new';
+    $type = Arr::get($_GET, 'type', 'house_new');
+    if (in_array($type, $this->type) == FALSE) {
+        $type = 'house_new';
     }
 
     $underground = $this->model_city->get_city_pretty($this->city_id, 2);
@@ -30,7 +30,7 @@ class Controller_Search extends Controller_Template {
     $city_group = $this->model_city->get_city_group($this->city_id);
     
     $view =  View::factory('search/search');
-    $view->set('stype', $stype);
+    $view->set('type', $type);
     $view->bind_global('city_underground', $underground);
     $view->bind_global('article_category', $category);
     $view->bind_global('initialize_type', $type);

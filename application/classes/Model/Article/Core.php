@@ -107,14 +107,16 @@ class Model_Article_Core extends Model {
 
 
 
-  public function get_list(array $where = NULL, $page = 1)
+  public function get_list($city_id, array $where = NULL)
   {
     $ret = array('total'=>0, 'data' => '');
-    $sql = 'SELECT * FROM "'. $this->table .'"';
     $parameters = array();
-    if($where !== NULL) 
+    $page = $where['page'];
+    unset($where['page']);
+    $sql = '';
+    if($where) 
     {
-      $sql .= ' WHERE ';
+      $sql .= ' AND  ';
       $w = array();
       foreach ($where as $k=>$v) {
         $w[] = $k.'=:'.$k;
@@ -122,17 +124,19 @@ class Model_Article_Core extends Model {
       }
       $sql .= implode(' AND ', $w);
     }
-    $sql .= '';
-    $page = max($page, 1);
-    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM "'.$this->table.'" ' .$where)
+    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM :table WHERE city_id=:city_id ' .$sql)
             ->parameters($parameters)
+            ->param(':city_id', $city_id)
+            ->param_extra(':table', $this->table)
             ->execute();
     $ret['total'] = $query->get('count');
     if ($ret['total']) {
-      $query = DB::query(Database::SELECT, $sql . 
+      $query = DB::query(Database::SELECT, 'SELECT * FROM :table WHERE city_id=:city_id ' . $sql . 
                    'ORDER BY weight DESC, aid DESC LIMIT :num OFFSET :start')
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', ($page-1) * $this->pagination->manager['items_per_page'])
+              ->param(':city_id', $city_id)
+              ->param_extra(':table', $this->table)
               ->as_object()
               ->execute();
       $ret['data'] = $query;

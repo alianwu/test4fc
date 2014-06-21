@@ -13,7 +13,8 @@ class Controller_Manager_Article extends Controller_Manager_Template {
   public function action_index()
   {
     $page = Arr::get($_GET, 'page', 1);
-    $article = $this->model->get_list(NULL, $page);
+    $where = array('page'=>$page);
+    $article = $this->model->get_list($this->city_id, $where);
     $category = $this->model_category->get_list_pretty();
 
     $view = View::factory('manager/article/article_index');
@@ -149,7 +150,8 @@ class Controller_Manager_Article extends Controller_Manager_Template {
 
   public function action_live()
   {
-    return $this->action_404();
+    $view = View::factory('manager/article/article_live');
+    $this->view($view);
   }
 
 } 

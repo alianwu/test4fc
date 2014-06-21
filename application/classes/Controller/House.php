@@ -12,8 +12,6 @@ class Controller_House extends Controller_Template {
     parent::before();
     $this->model_house = Model::factory('House');
     if ($this->auto_render) {
-      $city_group = $this->model_city->get_city_group($this->city_id);
-      $this->template->bind_global('city_group', $city_group);
     }
   }
 

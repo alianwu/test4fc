@@ -62,8 +62,9 @@ class Model_House extends Model {
     return $query->count() == 0 ? NULL : $query;
   }
 
-  public function get_latest_front($city_id, $page)
+  public function get_latest_front($city_id, $where)
   {
+    $page = $where['page'];
     $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat 
                 FROM house 
                 WHERE city_id=:city_id AND display=TRUE AND house_date_sale > current_date AND house_date_sale-90 < current_date ORDER BY stick DESC,  house_date_sale ASC, weight DESC LIMIT :num OFFSET :start ')
