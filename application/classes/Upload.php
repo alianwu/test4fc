@@ -76,7 +76,16 @@ class Upload extends  Kohana_Upload {
   {
     $cache = Cache::instance()->get('core');
     $dir =  Arr::path($cache, 'config.core.upload_dir');
-    $water =  Arr::path($cache, 'config.image.path');
+    $water_on =  Arr::path($cache, 'config.image.on');
+    if ($water_on == '0') {
+      $water = FALSE;
+    }
+    else {
+      $water =  Arr::path($cache, 'config.image.path');
+      if (!is_file($water)) {
+        $water = FALSE;
+      }
+    }
     $static_url =  Arr::path($cache, 'config.core.static_url');
     $safe_dir = $dir .date("Y/m") . DIRECTORY_SEPARATOR;;
     $real_dir = $safe_dir;
