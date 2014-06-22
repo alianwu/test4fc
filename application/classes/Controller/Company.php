@@ -23,17 +23,30 @@ class Controller_Company extends Controller_Template {
   {
     $id = (int) $this->request->param('id'); 
     if ($this->manager) {
-      $company = $this->model_company->get_one($id, TRUE);
+      $data = $this->model_company->get_one($id, TRUE);
     }
     else {
-      $company = $this->model_company->get_one_front($id);
+      $data = $this->model_company->get_one_front($id);
     }
     if ($id 
-      && $company) {
+      && $data) {
+      if ($data->city_area_shop) {
+        $where = array(
+            'page' => 1,
+            'shop' => $data->city_area_shop);
+        $house = Model::factory('House')->get_list_front($this->city_id, $where);
+        if ($house) {
+          $data->house_near = $house->as_array();
+        }
+        $school = Model::factory('School')->get_list_front($this->city_id, $where);
+        if ($school) {
+          $data->school_near = $school->as_array();
+        }
+      }
       $this->model_company->update_hot($id, 'hit');
       $view = View::factory('company/company_detail');
-      $company->image = json_decode($company->image);
-      $view->bind_global('company', $company);
+      $data->image = json_decode($data->image);
+      $view->bind_global('company', $data);
       $this->view($view);
     }
     else {

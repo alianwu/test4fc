@@ -25,6 +25,14 @@ class Controller_Manager_School extends Controller_Manager_Template {
         if($data) {
           $_POST = $data;
           $_POST['image'] = json_decode($_POST['image'], TRUE);
+          $_POST['phone'] = json_decode($_POST['phone'], TRUE); 
+          if ($_POST['phone']) {
+            $pstr = '';
+            foreach($_POST['phone'] as $v) {
+              $pstr .= $v['c'].' '.$v['n']."\n"; 
+            }
+            $_POST['phone'] = $pstr; 
+          }
         }
       }
     }
@@ -58,6 +66,9 @@ class Controller_Manager_School extends Controller_Manager_Template {
             array('not_empty'),
             array('min_length', array(':value', 3)),
             array('max_length', array(':value', 100))),
+      'phone' => array(
+            array('max_length', array(':value', 300)),
+          ),
       'hot' => array(
             array('digit')),
       'level' => array(

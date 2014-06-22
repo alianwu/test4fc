@@ -17,13 +17,13 @@ class Controller_House extends Controller_Template {
 
   public function action_index()
   {
-    $htype = Arr::get($_GET, 'htype', 'house_near');
-    if (!in_array($htype
+    $type = Arr::get($_GET, 'type', 'house_near');
+    if (!in_array($type
         , array('house_hot', 'house_latest', 'house_article', 'house_near'))) {
-      $htype = 'house_near';
+      $type = 'house_near';
     }
     $view =  View::factory('house/house');
-    $view->set('htype', $htype);
+    $view->set('type', $type);
     $this->view($view);
   }
 

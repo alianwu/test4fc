@@ -23,17 +23,31 @@ class Controller_School extends Controller_Template {
   {
     $id = (int) $this->request->param('id'); 
     if ($this->manager) {
-      $school = $this->model_school->get_one($id, TRUE);
+      $data = $this->model_school->get_one($id, TRUE);
     }
     else {
-      $school = $this->model_school->get_one_front($id);
+      $data = $this->model_school->get_one_front($id);
     }
     if ($id 
-      && $school) {
+      && $data) {
+      if ($data->city_area_shop) {
+        $where = array(
+            'page' => 1,
+            'shop' => $data->city_area_shop
+          );
+        $house = Model::factory('House')->get_list_front($this->city_id, $where);
+        if ($house) {
+          $data->house_near = $house->as_array();
+        }
+        $company = Model::factory('Company')->get_list_front($this->city_id, $where);
+        if ($company) {
+          $data->company_near = $company->as_array();
+        }
+      }
       $this->model_school->update_hot($id, 'hit');
       $view = View::factory('school/school_detail');
-      $school->image = json_decode($school->image);
-      $view->bind_global('school', $school);
+      $data->image = json_decode($data->image);
+      $view->bind_global('school', $data);
       $this->view($view);
     }
     else {

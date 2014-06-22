@@ -14,6 +14,19 @@ class Model_Company extends Model {
     $data['created'] = $data['updated'] = 'now()';
     $data['geo'] = 'ST_GeomFromText(\'POINT('.$data['lng'].' '.$data['lat'].')\', 4326)';
 
+    $phone = $data['phone'];
+    $ptmp = array();
+    if ($phone) {
+      $phone_list = explode("\n", $phone);
+      foreach($phone_list as $v) {
+        $pone = explode(' ', $v);
+        if (count($pone) > 1) {
+          $ptmp[] = array('n'=>$pone[1], 'c'=>$pone[0]);
+        }
+      }
+    }
+    $data['phone'] = json_encode($ptmp);
+
     $image = array();
     if (empty($data['image_history']) === FALSE) {
       foreach($data['image_history'] as $k=>$v) {
