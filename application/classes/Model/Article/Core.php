@@ -94,10 +94,11 @@ class Model_Article_Core extends Model {
     }
     $page = $where['page']; 
     $query = DB::query(Database::SELECT, 'SELECT * FROM :table
-                WHERE '.$sql.' ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
+                WHERE city_id=:city_id AND '.$sql.' ORDER BY weight DESC, created DESC LIMIT :num OFFSET :start ')
               ->parameters($parameters)
               ->parameters_extra($parameters_extra)
               ->param_extra(':table', $this->table)
+              ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->as_object()
