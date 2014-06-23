@@ -116,7 +116,7 @@ abstract class Controller_Template extends Controller {
     if ($id !== NULL) { 
       $this->city_id = $id;
       if (isset($geo['lat'])) {
-        $geo['city_id'] =$this->city_id;
+        $geo['city_id'] = $this->city_id;
       }
       $this->session->set('geo', $geo);
     }

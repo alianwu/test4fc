@@ -48,7 +48,7 @@ class Pretty {
     }
     foreach($tag as $v) {
       if(isset($cache_tag[$v])) {
-        $tag_str .= $html?HTML::anchor('article_home/tag/'.$v, $cache_tag[$v]):$cache_tag[$v].' ';
+        $tag_str .= $html?HTML::anchor('article'.URL::query(array('atype'=>'tag', 'tid'=>$v)), $cache_tag[$v]):$cache_tag[$v].' ';
 
       }
     }

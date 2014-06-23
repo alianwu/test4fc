@@ -35,6 +35,7 @@ return array(
 
   'school' => '学区',
   'company' => '公司',
+  'house' => '房源',
   'house_new' => '新房',
   'house_rent' => '租售',
   'article' => '资讯',

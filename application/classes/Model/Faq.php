@@ -9,17 +9,29 @@ class Model_Faq extends Model {
   {
     $page = max((int) (isset($where['page'])? $where['page'] : 1), 1);
 
-    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM :table WHERE  city_id=:city_id')
+    $sql = '';
+    $param = array();
+    if (isset($where['type']) && $where['type']) {
+      $sql .= ' AND type=:type';
+      $param[':type'] = $where['type'];
+    }
+    if (isset($where['id']) && $where['id']) {
+      $sql .= ' AND id=:id';
+      $param[':id'] = $where['id'];
+    }
+    $query = DB::query(Database::SELECT, 'SELECT count(*) FROM :table WHERE  city_id=:city_id '.$sql)
               ->param(':city_id', $city_id)
+              ->parameters($param)
               ->param_extra(':table', $this->table)
               ->as_object()
               ->execute();
     $ret['total'] = $query->get('count', 0);
 
     $query = DB::query(Database::SELECT, 'SELECT * FROM :table
-                WHERE city_id=:city_id ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
+                WHERE city_id=:city_id '.$sql.' ORDER BY weight DESC, fid DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param_extra(':table', $this->table)
+              ->parameters($param)
               ->param(':num', $this->pagination->manager['items_per_page'])
               ->param(':start', $this->pagination->manager['items_per_page'] * ($page-1))
               ->as_object()
