@@ -111,15 +111,15 @@ class Controller_Api_Article extends Controller_Api {
       return $this->error_user();
     }
     $message = Arr::get($_POST, 'message');
-    $vphoto = '';
+    $vphoto = Arr::get($_POST, 'vphoto');
     $aid = Arr::get($_POST, 'aid');
-    if (isset($_FILES['imgFile'])) {
-      $path = Upload::save_get_path($_FILES['imgFile']);
-      $vphoto = HTML::image($path[0]);
-    }
+    //if (isset($_FILES['imgFile'])) {
+      //$path = Upload::save_get_path($_FILES['imgFile']);
+      //$vphoto = HTML::image($path[0]);
+    //}
     if ($message || $vphoto) {
       if ($vphoto) {
-        $message .= '<br />' . $vphoto;
+        $message .= '<br />' . HTML::image($vphoto, array('class'=>'live-img'));
       }
       $data = array(
         'message' => $message,
