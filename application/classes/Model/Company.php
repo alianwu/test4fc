@@ -39,7 +39,8 @@ class Model_Company extends Model {
     }
     if ($image) {
       $data['image'] = json_encode($image);
-      $data['image_default'] = $image[0]['src'];
+      $default = Upload::image_cache($image[0]['src']);
+      $data['image_default'] = $default;
     }
     $parameters = array();
     $parameters_extra = array();
