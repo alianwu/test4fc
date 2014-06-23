@@ -53,7 +53,7 @@ class Model_House extends Model {
   {
     $query = DB::query(Database::SELECT, 'SELECT *, gps[0] AS lng, gps[1] AS lat
                 FROM house 
-                WHERE city_id=:city_id AND hot=1 AND display=TRUE ORDER BY hit DESC, weight DESC LIMIT :num OFFSET :start ')
+                WHERE city_id=:city_id  AND display=TRUE ORDER BY hot DESC, weight DESC LIMIT :num OFFSET :start ')
               ->param(':city_id', $city_id)
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
