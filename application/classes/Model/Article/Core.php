@@ -84,8 +84,8 @@ class Model_Article_Core extends Model {
         $parameters[':cat'] = $where['cat'];
     } 
     if (isset($where['tag']) && $where['tag']) {
-        $sql .= ' AND tag @> {:tag} ';
-        $parameters_extra[':tag'] = $where['tag'];
+        $sql .= ' AND tag @> :tag ';
+        $parameters[':tag'] = '{'.$where['tag'].'}';
     } 
     if (isset($where['day']) && $where['day']) {
         $sql .= ' AND created > :created ';
