@@ -131,7 +131,7 @@ abstract class Controller_Template extends Controller {
     elseif ($v = Arr::get($_SERVER, 'GEOIP_CITY') ) {
       $ret = $this->model_city->get_city_from_value(strtolower($v));
       if ($ret) {
-        $this->city_id = $ret->get('cid');
+        $this->city_id = $ret->cid;
         $this->city_lng = Arr::get($_SERVER, 'GEOIP_LONGITUDE');
         $this->city_lat = Arr::get($_SERVER, 'GEOIP_LATITUDE');
         return TRUE;
