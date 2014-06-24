@@ -145,6 +145,8 @@ class Model_House extends Model {
               ->param(':num', $this->pagination->default['items_per_page'])
               ->param(':start', $this->pagination->default['items_per_page'] * ($page-1))
               ->execute();
+    //$data = var_export($query, TRUE);
+    //file_put_contents('/tmp/sql.txt', $data);
     return $query->count() == 0 ? NULL : $query;
   }
   
@@ -224,6 +226,8 @@ class Model_House extends Model {
     $rcode = 0;
     $data['gps'] = $data['lng'] . ',' . $data['lat']; 
     $data['geo'] = 'ST_GeomFromText(\'POINT('.$data['lng'].' '.$data['lat'].')\', 4326)';
+    //echo $data['geo'];
+    //exit;
     $data['display'] = (bool) $data['display']; 
     $data['updated'] = 'now()';
 
@@ -289,6 +293,7 @@ class Model_House extends Model {
       switch($k) {
       case 'updated':
       case 'geo':
+        $upset .= $k.'=:'.$k.',';
         $parameters_extra[':'.$k] = $v;
         break;
       case 'display':
