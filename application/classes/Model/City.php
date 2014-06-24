@@ -58,7 +58,7 @@ class Model_City extends Model {
               ->param(':display', TRUE)
               ->param(':value', $value)
               ->param(':type', 1)
-              ->as_object();
+              ->as_object()
               ->execute();
     return $query->count() == 0? NULL:$query->current();
   }
